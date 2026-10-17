@@ -18,7 +18,8 @@
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed-demo.ts",
     "ext:zip": "powershell -NoProfile -Command \"Compress-Archive -Force -Path extension/* -DestinationPath public/corvus-capture.zip\"",
     "seed:catalog": "tsx --env-file-if-exists=.env.local scripts/seed-catalog.ts",
-    "seed:recap": "tsx --env-file-if-exists=.env.local scripts/seed-recap.ts"
+    "seed:recap": "tsx --env-file-if-exists=.env.local scripts/seed-recap.ts",
+    "eval": "tsx scripts/eval.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.4.0",
