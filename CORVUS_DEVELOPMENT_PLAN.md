@@ -65,18 +65,18 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 
 Scripts are written (`spikes/`, run with `npm run spike:*`); they still need a configured project to run.
 
-- [ ] **Video:** Gemini on Vertex analyses a public YouTube URL and returns timestamped moments JSON. If it fails → test Gemini Developer API key path or `gs://` copy, record the outcome in §9.
-- [ ] **Embeddings:** `gemini-embedding-001` at 768 dims; check an English and an [L2] sentence on the same idea land close together.
-- [ ] **TTS:** generate 10 s of speech in English and [L2]; confirm output format.
-- [ ] **Function calling:** one tool call round trip with the chosen fast model.
-- [ ] **Firestore vector:** create the composite vector index (`workspaceId` + `embedding`) and run one `findNearest`.
+- [x] **Video:** PASS on the Google Cloud endpoint directly (no API-key fallback). `gemini-3.8-flash`, low media resolution. (a) 6-min song (Y5z_4utl678): 7 moments, 18 s, ~23k tokens. (b) 60-min lecture, CS 285 Lecture 1 (DD8APgTEix4): 43 moments, 98.5 s, ~232k tokens; rich visual detail (slides, equations, demo clips: dog-training slide, Atari tunnel trick, AlphaGo Move 37). Findings: the 40-moment cap makes long-video moments 27–128 s (avg 84), too coarse for exact-second recall → analyse long videos in ~10-min windows; the lecture's oEmbed returns 401, which likely means embedding is disabled → check before choosing seed videos. (c) 20-min tutorial (Js05B8Z1ivE, embeddable) with MM:SS timestamps: 39 moments (avg ~30 s), 38 s, ~112k tokens; boundaries identical across two runs; team hand-checked timestamps and confirmed accurate (2026-10-17). Medium resolution gave coarser moments at the same cost → keep low. Lecture timestamps (b) were partly inaccurate → seed videos ≤ ~20 min.
+- [x] **Embeddings:** PASS. `gemini-embedding-2` chosen over `gemini-embedding-001`: EN↔JA same-idea 0.894 vs unrelated 0.547 (margin 0.347 vs 0.270), query→source 0.859 vs 0.781, faster.
+- [x] **TTS:** PASS. `gemini-2.5-flash-tts` returns 24 kHz 16-bit PCM (`audio/L16`); EN 10.4 s and JA 7.6 s clips generated in 5–8 s. Listen check pending.
+- [x] **Function calling:** PASS with `gemini-3.5-flash`: 2 steps, ~5 s, correct citation; tools + JSON response schema work in one request. Japanese question → Japanese answer citing the English source. `gemini-3.8-flash` rejected for the agent: one call took 252 s and it looped searches until the 6-step cap.
+- [x] **Firestore vector:** PASS. Index (workspaceId, active, embedding 768 flat) READY; workspace-filtered `findNearest` 0.8 s, inactive memories excluded.
 
 ### Skeleton
 
 - [x] Scaffold Next.js + TypeScript + Tailwind + Vitest; `.gitignore`, `.env.example` (spec §19).
 - [x] `/api/health`, landing page with disclosure.
 - [x] Shared schemas (`lib/ai/schemas.ts`) and Firestore client.
-- [ ] Deploy to Cloud Run with a least-privilege service account (Vertex AI User, Firestore User, Storage Object Admin on the bucket).
+- [x] Deploy to Cloud Run with a least-privilege service account (Vertex AI User, Firestore User, Storage Object Admin on the bucket).
 
 **Exit:** deployed URL returns health OK; all five spikes pass or have a recorded fallback.
 
@@ -161,18 +161,18 @@ Open question: the earlier plan listed a mandatory GitHub repo, a brief descript
 ## 9. Environment record (fill in; no secrets)
 
 ```text
-Project ID:                 TBD
-Region (Cloud Run):         TBD
-Firestore location:         TBD
-Gemini location:            TBD
-GCS bucket:                 TBD
-Fast model (agent):         TBD
-Video model:                TBD   YouTube URL on Vertex: TBD (yes / fallback used)
-TTS model:                  TBD
-Embedding model / dims:     gemini-embedding-001 / 768 (verify)
+Project ID:                 corvus-511804 (number 378059077328)
+Region (Cloud Run):         asia-southeast1
+Firestore location:         asia-southeast1 (Native)
+Gemini location:            global (to verify with spikes)
+GCS bucket:                 corvus-511804-corvus-recaps
+Fast model (agent):         gemini-3.5-flash
+Video model:                gemini-3.8-flash   YouTube URL on Vertex: yes (no fallback needed)
+TTS model:                  gemini-2.5-flash-tts
+Embedding model / dims:     gemini-embedding-2 / 768 (verified)
 [L2] language:              TBD
-Cloud Run URL:              TBD
-Final revision:             TBD
+Cloud Run URL:              https://corvus-378059077328.asia-southeast1.run.app
+Current revision:           corvus-00002-pdg (2026-10-17, final model env vars, health OK)
 GitHub repo:                TBD
 ```
 
@@ -189,6 +189,8 @@ GitHub repo:                TBD
 | 2026-10-16 | Approved: Memory Threads, audio recap, Learning Gap Detector, cross-language recall, agentic Ask | Team confirmation; ordered in tiers |
 | 2026-10-16 | App first; deck and video after freeze | Team confirmation |
 | 2026-10-16 | Dropped recreated Google app UIs, Maps, Music, weighted recommender, Firebase Auth | Three-day scope |
+| 2026-10-17 | Agent model gemini-3.5-flash; video model gemini-3.8-flash (pending); TTS gemini-2.5-flash-tts; embeddings gemini-embedding-2 @ 768 | Day-0 spike results (see §4) |
+| 2026-10-17 | Video analysis: MM:SS timestamps, low media resolution, seed videos ≤ ~20 min and embeddable (oEmbed 200) | Accuracy hand-checked on a 20-min tutorial; a 60-min lecture was partly inaccurate |
 
 ---
 
@@ -198,10 +200,12 @@ GitHub repo:                TBD
 |---|---|---|---|
 | R1 | Three days is very tight | Tiers, cut order, deploy Day 0 | Open |
 | R2 | YouTube-URL video input unavailable on Vertex in region | Day-0 spike; fallback paths in spec §11 F1 | Open |
-| R3 | Agent loop latency during demo | Fast model, ≤ 6 steps, warm instance | Open |
-| R4 | Firestore vector index setup | Day-0 spike | Open |
+| R3 | Agent loop latency during demo | Use gemini-3.5-flash (~5 s); add a per-call timeout (abort + one retry) and keep the 6-step cap; warm instance | Mitigated |
+| R4 | Firestore vector index setup | Index READY, spike passed | Closed |
 | R5 | Google Cloud CLI not installed on the main dev machine (git, Node 22, npm, Docker are present) | Install gcloud before Cloud setup and deploy | Open |
 | R6 | Deadline hour unknown | Confirm today | Open |
+| R7 | Seed videos that block embedding cannot open inside the app at a timestamp | Check oEmbed (200 = embeddable) for every seed video; fall back to opening youtube.com at ?t= | Open |
+| R8 | Long videos give coarse and partly inaccurate moments | Seed videos ≤ ~20 min (verified accurate); long videos later in ~10-min windows | Mitigated |
 
 ---
 
@@ -211,12 +215,13 @@ GitHub repo:                TBD
 |---|---|---|---|---|
 | 2026-10-16 | Planning | v2 spec and three-day plan written | Docs updated | Day 0 setup and spikes |
 | 2026-10-16 | Day 0 | Next.js app scaffolded at repo root; env validation, Gemini and Firestore clients, shared Zod schemas + citation validator, `/api/health`, landing page, Dockerfile, six spike scripts, README with Cloud setup commands; local git repo initialised (no commits) | lint, typecheck, 3 unit tests, `next build`, standalone server returned health OK locally | Blocked on: gcloud CLI, Cloud project. Then Cloud setup, spikes, first Cloud Run deploy |
+| 2026-10-17 | Day 0 | Cloud setup verified (APIs, billing, Firestore asia-southeast1, vector index, bucket, corvus-run SA); first Cloud Run deploy; ADC configured; spikes: models, embeddings, tools, Firestore, TTS | Deployed revision corvus-00001-ht5 health OK; spike results in §4 | Video spike passed 2026-10-17 (Vertex accepts YouTube URLs). Redeploy with final model env vars |
 
 ---
 
 ## 13. Current handoff
 
-- Active: **Day 0 — setup and spikes**
+- Active: **Day 0 complete — Day 1 (Tier 0) next**
 - Build: scaffolded (Next.js 16.4, standalone output, Dockerfile); lint, typecheck, unit tests, production build and local `/api/health` pass
-- Deployed URL: none
-- Next: team installs gcloud and finishes the Cloud setup in §4, fills `.env.local`, then runs the spikes in order (models → embeddings → tools → firestore → tts → video) and first deploy.
+- Deployed URL: https://corvus-378059077328.asia-southeast1.run.app (revision corvus-00002-pdg)
+- Next: Day 1. Decide topic, [L2], and 2–3 seed videos (≤ ~20 min, oEmbed 200); WORKSPACE_COOKIE_SECRET goes into Secret Manager when the workspace cookie lands.

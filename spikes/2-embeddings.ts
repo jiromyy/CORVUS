@@ -9,7 +9,7 @@ import { cosine, fail, pass, requireEnv, timed } from "./_shared";
 
 const SPIKE = "embeddings";
 const env = requireEnv("GOOGLE_CLOUD_PROJECT", "GOOGLE_CLOUD_LOCATION");
-const model = process.env.EMBEDDING_MODEL || "gemini-embedding-001";
+const model = process.env.EMBEDDING_MODEL || "gemini-embedding-2";
 const dims = Number(process.env.EMBEDDING_DIMENSION || 768);
 
 const english = "Quantum error correction protects fragile qubits, like a choir keeping in tune when one singer drifts.";

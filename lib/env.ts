@@ -6,7 +6,7 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().min(1),
   GEMINI_VIDEO_MODEL: z.string().optional(),
   GEMINI_TTS_MODEL: z.string().optional(),
-  EMBEDDING_MODEL: z.string().min(1).default("gemini-embedding-001"),
+  EMBEDDING_MODEL: z.string().min(1).default("gemini-embedding-2"),
   EMBEDDING_DIMENSION: z.coerce.number().int().positive().max(2048).default(768),
   FIRESTORE_DATABASE: z.string().min(1).default("(default)"),
   GCS_BUCKET: z.string().optional(),

@@ -203,9 +203,9 @@ Seed state: Maya's workspace with a "Quantum Computing" thread (2–3 videos, se
 
 - Input: public YouTube URL.
 - Gemini call with the video as `fileData` (YouTube URL) plus a prompt to return JSON: list of moments `{ startSeconds, endSeconds, spokenSummary, visualDescription, keyTerms[], language }`, plus video-level `{ title, summary, topics[] }`.
-- Moment length roughly 20–60 s. Cap moments per video (~40).
+- Moment length roughly 20–60 s. Cap moments per video (~40). Ask Gemini for `start`/`end` as `MM:SS` strings (H:MM:SS past an hour) and convert to seconds server-side; raw seconds were less reliable. Use low media resolution (medium gave coarser moments at the same cost).
 - Each moment becomes a `MemoryRecord` of type `video_moment`, with embedding text = title + spokenSummary + visualDescription + keyTerms.
-- **Day-0 verification required:** confirm Vertex AI accepts YouTube URLs for the chosen model in the chosen region. Fallback if not: use the Gemini Developer API (AI Studio key, server-side) for the analysis step only, or download a CC-licensed copy to Cloud Storage and pass a `gs://` URI.
+- **Verified on Day 0 (2026-10-17):** the Google Cloud endpoint accepts YouTube URLs with `gemini-3.8-flash`; no fallback needed. Timestamps were accurate on a 20-min tutorial (39 moments, ~38 s, ~112k tokens) but partly inaccurate on a 60-min lecture, so keep videos ≤ ~20 min or analyse longer ones in ~10-min windows. Before adding a video, check it is embeddable (`https://www.youtube.com/oembed?url=…` returns 200; 401 means embedding is disabled).
 
 ### F2. Agentic Ask Corvus (Tier 0)
 
@@ -249,7 +249,7 @@ Return JSON matching the provided schema.
 
 ### F3. Cross-language recall (Tier 0)
 
-- Use a multilingual embedding model (e.g., `gemini-embedding-001`) with task types `RETRIEVAL_DOCUMENT` for memories and `RETRIEVAL_QUERY` for questions.
+- Use a multilingual embedding model (`gemini-embedding-2`, chosen by the Day-0 spike over `gemini-embedding-001`) with task types `RETRIEVAL_DOCUMENT` for memories and `RETRIEVAL_QUERY` for questions.
 - Store `language` on each memory; show a language badge on source cards.
 - Agent answers in the question's language (system instruction above).
 - Acceptance: an [L2] question retrieves the English video moment in the top 3, and an English question retrieves the [L2] article in the top 3.
@@ -500,7 +500,7 @@ Keyboard navigation, visible focus, labelled inputs, sufficient contrast, reduce
 
 ### Thread A — Quantum computing (English + [L2])
 
-- 2–3 **public, embeddable** YouTube videos on quantum error correction / decoherence / no-cloning. Prefer Creative Commons. At least one must contain an analogy or visual the team can ask about. (If no video has a "choir" analogy, change the demo question to match what the real video actually shows — do not invent it.)
+- 2–3 **public, embeddable (oEmbed 200), ≤ ~20-min** YouTube videos on quantum error correction / decoherence / no-cloning. Prefer Creative Commons. At least one must contain an analogy or visual the team can ask about. (If no video has a "choir" analogy, change the demo question to match what the real video actually shows — do not invent it.)
 - Searches: "why qubits lose information", "decoherence meaning" ×3 (gap signal), "[L2] query about qubits".
 - One original English article (team-written, ~600 words) on decoherence.
 - One original [L2] article (team-written or Gemini-drafted then reviewed) on error correction.
@@ -556,7 +556,7 @@ GOOGLE_GENAI_USE_VERTEXAI=true
 GEMINI_MODEL=                     # fast model for agent loop
 GEMINI_VIDEO_MODEL=               # model used for video analysis (may equal GEMINI_MODEL)
 GEMINI_TTS_MODEL=
-EMBEDDING_MODEL=gemini-embedding-001
+EMBEDDING_MODEL=gemini-embedding-2
 EMBEDDING_DIMENSION=768
 FIRESTORE_DATABASE=(default)
 GCS_BUCKET=
