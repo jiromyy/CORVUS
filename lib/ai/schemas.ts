@@ -36,6 +36,21 @@ export const ContentItem = z.object({
   summary: z.string().optional(),
   topics: z.array(z.string()),
   analysisStatus: z.enum(["none", "pending", "done", "failed"]),
+  thumbnailUrl: z.string().optional(),
+  /** Videos: analysed moments (shared across workspaces; not personal data). */
+  moments: z
+    .array(
+      z.object({
+        startSeconds: z.number().nonnegative(),
+        endSeconds: z.number().nonnegative(),
+        spokenSummary: z.string(),
+        visualDescription: z.string(),
+        keyTerms: z.array(z.string()),
+      }),
+    )
+    .optional(),
+  /** Articles: readable chunks, addressed as #chunk-<n>. */
+  bodyChunks: z.array(z.object({ heading: z.string().optional(), text: z.string() })).optional(),
 });
 
 export const MemoryRecord = z.object({

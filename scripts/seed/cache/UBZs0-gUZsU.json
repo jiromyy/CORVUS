@@ -1,0 +1,158 @@
+{
+  "title": "Basic Python Tutorial - Part 1: IDE and Hello World",
+  "summary": "This beginner-friendly tutorial introduces the Python programming language and guides viewers through installing Python and the PyCharm IDE. It then demonstrates creating a new project, writing a basic 'Hello World' program using the print() function, and adjusting editor font settings.",
+  "language": "fil",
+  "topics": [
+    "Python Tutorial",
+    "IDE Setup",
+    "PyCharm Installation",
+    "Hello World Program",
+    "Python Basics"
+  ],
+  "moments": [
+    {
+      "startSeconds": 0,
+      "endSeconds": 43,
+      "spokenSummary": "The speaker introduces the basic Python tutorial series aimed at beginners without prior programming background.",
+      "visualDescription": "Title slide 'Basic Python Tutorial - Part 1: IDE and Hello World' followed by a slide noting the series target audience.",
+      "keyTerms": [
+        "Python",
+        "IDE",
+        "Hello World"
+      ]
+    },
+    {
+      "startSeconds": 43,
+      "endSeconds": 140,
+      "spokenSummary": "Key features of Python are explained, highlighting its readability, indentation rules, concise syntax, and lack of semicolons.",
+      "visualDescription": "Slide listing characteristics of Python Language with four bullet points.",
+      "keyTerms": [
+        "Indentation",
+        "Syntax",
+        "Semicolon"
+      ]
+    },
+    {
+      "startSeconds": 140,
+      "endSeconds": 218,
+      "spokenSummary": "The video outlines the tutorial flow and explains what an IDE is, introducing PyCharm and IDLE.",
+      "visualDescription": "Slides showing 'Tutorial Flow' and defining 'IDE (Integrated Development Environment)' alongside logos of PyCharm and IDLE.",
+      "keyTerms": [
+        "IDE",
+        "Pycharm",
+        "IDLE"
+      ]
+    },
+    {
+      "startSeconds": 218,
+      "endSeconds": 271,
+      "spokenSummary": "The presenter demonstrates searching for and downloading Python and PyCharm Community Edition via Google.",
+      "visualDescription": "Web browser navigation to python.org/downloads and jetbrains.com to download Python 3.8.2 and PyCharm Community.",
+      "keyTerms": [
+        "python.org",
+        "PyCharm Community",
+        "Download Python 3.8.2"
+      ]
+    },
+    {
+      "startSeconds": 271,
+      "endSeconds": 308,
+      "spokenSummary": "The installation process of Python 3.8.2 on Windows is demonstrated, emphasizing adding Python to PATH.",
+      "visualDescription": "Python 3.8.2 (32-bit) Setup wizard with 'Add Python 3.8 to PATH' checked and setup completing successfully.",
+      "keyTerms": [
+        "Add Python 3.8 to PATH",
+        "Install Now",
+        "Setup Progress"
+      ]
+    },
+    {
+      "startSeconds": 308,
+      "endSeconds": 410,
+      "spokenSummary": "The installer for PyCharm Community Edition is launched and configured with install paths and desktop associations.",
+      "visualDescription": "PyCharm Community Edition Setup wizard navigating installation folder, options, and completing installation.",
+      "keyTerms": [
+        "PyCharm Community Edition",
+        "64-bit launcher",
+        ".py association"
+      ]
+    },
+    {
+      "startSeconds": 410,
+      "endSeconds": 447,
+      "spokenSummary": "The presenter briefly showcases the default IDLE interactive shell bundled with Python.",
+      "visualDescription": "Opening IDLE from the Windows Start Menu and displaying the Python 3.8.2 interactive shell prompt.",
+      "keyTerms": [
+        "IDLE",
+        "Python 3.8.2 Shell"
+      ]
+    },
+    {
+      "startSeconds": 447,
+      "endSeconds": 484,
+      "spokenSummary": "The concept and syntax of Python's print() function are introduced before launching PyCharm.",
+      "visualDescription": "Slide explaining the print() function syntax: print(\"Hello World\").",
+      "keyTerms": [
+        "print()",
+        "Syntax",
+        "console"
+      ]
+    },
+    {
+      "startSeconds": 484,
+      "endSeconds": 551,
+      "spokenSummary": "PyCharm opens and a new project named PythonTutorial is created using the installed Python interpreter.",
+      "visualDescription": "PyCharm loading screen followed by creating a new project named PythonTutorial with base interpreter configuration.",
+      "keyTerms": [
+        "PyCharm",
+        "PythonTutorial",
+        "interpreter",
+        "virtualenv"
+      ]
+    },
+    {
+      "startSeconds": 551,
+      "endSeconds": 614,
+      "spokenSummary": "A new Python file is created and the first 'Hello World' script is written and executed.",
+      "visualDescription": "Creating HelloWorldTutorial.py in the project tree, typing print(\"Hello World\"), and running it to show output in the console.",
+      "keyTerms": [
+        "HelloWorldTutorial.py",
+        "print(\"Hello World\")",
+        "Run"
+      ]
+    },
+    {
+      "startSeconds": 614,
+      "endSeconds": 699,
+      "spokenSummary": "Execution order from top to bottom is demonstrated by adding multiple print statements and switching their positions.",
+      "visualDescription": "Editing lines of code with print(\"World\") and print(\"Hello\"), running the program, and showing the sequential output in console.",
+      "keyTerms": [
+        "print()",
+        "top to bottom",
+        "Hello Programmers"
+      ]
+    },
+    {
+      "startSeconds": 699,
+      "endSeconds": 751,
+      "spokenSummary": "The presenter demonstrates how to customize and enlarge the editor font size in PyCharm settings.",
+      "visualDescription": "Navigating to File > Settings > Editor > Font, increasing the font size to 20, and applying the change to editor text.",
+      "keyTerms": [
+        "Settings",
+        "Editor",
+        "Font",
+        "Size"
+      ]
+    },
+    {
+      "startSeconds": 751,
+      "endSeconds": 816,
+      "spokenSummary": "The speaker compares the PyCharm script workflow against immediate execution in IDLE and closes the video.",
+      "visualDescription": "Typing print statements into IDLE Shell showing immediate output versus multiline scripts in PyCharm, followed by outro logo.",
+      "keyTerms": [
+        "IDLE Shell",
+        "print()",
+        "multiline"
+      ]
+    }
+  ]
+}

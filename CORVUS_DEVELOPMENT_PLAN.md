@@ -86,24 +86,24 @@ Scripts are written (`spikes/`, run with `npm run spike:*`); they still need a c
 
 ### Morning
 
-- [ ] **Decide seed content** (team, 1 hour max): pick 2–3 real embeddable YouTube videos, watch them, write the demo questions that match what they actually show. Choose [L2]. Draft the two original articles.
-- [ ] A: event→memory pipeline; video analysis module; article chunking; embedding batcher.
-- [ ] B: `search_memories` with vector + keyword rerank; workspace scoping.
-- [ ] C: app shell, onboarding, Ask page, source card component, YouTube viewer that seeks to a timestamp.
+- [x] **Decide seed content** (team, 1 hour max): pick 2–3 real embeddable YouTube videos, watch them, write the demo questions that match what they actually show. Choose [L2]. Draft the two original articles.
+- [x] A: event→memory pipeline; video analysis module; article chunking; embedding batcher.
+- [x] B: `search_memories` with vector + keyword rerank; workspace scoping.
+- [x] C: app shell, (onboarding screen still to do), Ask page, source card component, YouTube viewer that seeks to a timestamp.
 - [ ] D: help A with the seed script; draft thread data for the seed.
 
 ### Afternoon
 
-- [ ] A: seed script runs end to end against the real project (content, events, moments, embeddings).
-- [ ] B: agent loop with tools, structured answer, citation validation, step trace output, fallback behaviour.
-- [ ] C: answer view with step trace; memory library with delete; signed-cookie workspace.
+- [x] A: seed script runs end to end against the real project (content, events, moments, embeddings).
+- [x] B: agent loop with tools, structured answer, citation validation, step trace output, fallback behaviour.
+- [x] C: answer view with step trace; memory library with delete; signed-cookie workspace.
 - [ ] D: thread grouping in seed; thread page skeleton.
 
 ### Evening
 
-- [ ] Deploy. From an incognito window: ask the visual-memory question → correct video opens at the right second.
-- [ ] Ask the [L2] question → answer in [L2] citing English sources.
-- [ ] Delete a memory → it no longer appears.
+- [x] Deploy. From an incognito window: ask the visual-memory question → correct video opens at the right second.
+- [x] Ask the [L2] question → answer in [L2] citing English sources.
+- [x] Delete a memory → it no longer appears.
 
 **Exit (Tier 0 done):** all three checks above pass on the deployed URL.
 
@@ -170,9 +170,9 @@ Fast model (agent):         gemini-3.5-flash
 Video model:                gemini-3.8-flash   YouTube URL on Vertex: yes (no fallback needed)
 TTS model:                  gemini-2.5-flash-tts
 Embedding model / dims:     gemini-embedding-2 / 768 (verified)
-[L2] language:              TBD
+[L2] language:              Filipino (topic: Python for beginners)
 Cloud Run URL:              https://corvus-378059077328.asia-southeast1.run.app
-Current revision:           corvus-00002-pdg (2026-10-17, final model env vars, health OK)
+Current revision:           corvus-00003-sbm (2026-10-17, Day 1 Tier 0, min-instances 1, cookie secret from Secret Manager)
 GitHub repo:                TBD
 ```
 
@@ -191,6 +191,7 @@ GitHub repo:                TBD
 | 2026-10-16 | Dropped recreated Google app UIs, Maps, Music, weighted recommender, Firebase Auth | Three-day scope |
 | 2026-10-17 | Agent model gemini-3.5-flash; video model gemini-3.8-flash (pending); TTS gemini-2.5-flash-tts; embeddings gemini-embedding-2 @ 768 | Day-0 spike results (see §4) |
 | 2026-10-17 | Video analysis: MM:SS timestamps, low media resolution, seed videos ≤ ~20 min and embeddable (oEmbed 200) | Accuracy hand-checked on a 20-min tutorial; a 60-min lecture was partly inaccurate |
+| 2026-10-17 | Demo topic Python for beginners; second language Filipino; 4 seed videos (spec §17) | Team decision |
 
 ---
 
@@ -216,12 +217,13 @@ GitHub repo:                TBD
 | 2026-10-16 | Planning | v2 spec and three-day plan written | Docs updated | Day 0 setup and spikes |
 | 2026-10-16 | Day 0 | Next.js app scaffolded at repo root; env validation, Gemini and Firestore clients, shared Zod schemas + citation validator, `/api/health`, landing page, Dockerfile, six spike scripts, README with Cloud setup commands; local git repo initialised (no commits) | lint, typecheck, 3 unit tests, `next build`, standalone server returned health OK locally | Blocked on: gcloud CLI, Cloud project. Then Cloud setup, spikes, first Cloud Run deploy |
 | 2026-10-17 | Day 0 | Cloud setup verified (APIs, billing, Firestore asia-southeast1, vector index, bucket, corvus-run SA); first Cloud Run deploy; ADC configured; spikes: models, embeddings, tools, Firestore, TTS | Deployed revision corvus-00001-ht5 health OK; spike results in §4 | Video spike passed 2026-10-17 (Vertex accepts YouTube URLs). Redeploy with final model env vars |
+| 2026-10-17 | Day 1 | Tier 0 built: video analysis (MM:SS, balanced ≤10-min windows, retry), embeddings, Firestore store, seed of 4 videos + 2 articles + 8 searches (125 memories), hybrid search with per-source diversity, Ask agent (tools, forced final answer, citation check, inline-ID stripping, LOW thinking), signed workspace cookie, Ask/Watch/Read/Memory UI | 19 unit tests; local browser checks: cross-app answer cites article + 9:51 moment + search; Filipino Q answered in Filipino; viewer plays from 17:39; delete removes all 25 memories of a video from recall; restore works; warm latency 4–9 s | Deployed corvus-00003-sbm; fresh-visitor checks on the live URL passed (cross-app 7.1 s, Filipino 5.5 s, delete → honest "not found" with 0 leaks, restore, viewer at 9:51). Next: onboarding screen, Tier 1 (recap, threads, add by URL) |
 
 ---
 
 ## 13. Current handoff
 
-- Active: **Day 0 complete — Day 1 (Tier 0) next**
+- Active: **Day 1 Tier 0 complete and deployed — Tier 1 next (audio recap, Memory Threads, Add by URL)**
 - Build: scaffolded (Next.js 16.4, standalone output, Dockerfile); lint, typecheck, unit tests, production build and local `/api/health` pass
-- Deployed URL: https://corvus-378059077328.asia-southeast1.run.app (revision corvus-00002-pdg)
+- Deployed URL: https://corvus-378059077328.asia-southeast1.run.app (revision corvus-00003-sbm)
 - Next: Day 1. Decide topic, [L2], and 2–3 seed videos (≤ ~20 min, oEmbed 200); WORKSPACE_COOKIE_SECRET goes into Secret Manager when the workspace cookie lands.

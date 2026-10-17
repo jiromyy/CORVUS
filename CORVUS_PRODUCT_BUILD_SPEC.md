@@ -75,9 +75,9 @@ Judges will ask how Corvus differs from Google's own personal-history features (
 
 ## 5. Persona
 
-**Maya, university student.** Watches lecture videos, searches unfamiliar terms (sometimes in her first language), reads explainers, commutes by train. She remembers explanations but not where they came from, and does not notice which concepts she keeps getting stuck on.
+**Maya, university student in the Philippines learning Python.** Watches tutorial videos in English and Filipino, searches unfamiliar terms (sometimes in her first language), reads explainers, commutes by train. She remembers explanations but not where they came from, and does not notice which concepts she keeps getting stuck on.
 
-Demo language pairing: English sources plus **one non-English language — to be chosen by the team** (see §20). All examples below say "[L2]" for that language.
+Demo language pairing: English plus **Filipino** (decided 2026-10-17). Examples below say "[L2]" for Filipino.
 
 ---
 
@@ -105,6 +105,8 @@ Demo language pairing: English sources plus **one non-English language — to be
 | AI | Gemini on Vertex AI via `@google/genai`: generation, video understanding, embeddings, TTS |
 | Auth | No sign-in. Anonymous per-browser workspace (§12). Firebase Anonymous Auth only if time remains |
 | Priority | App first; deck and video after the app is frozen |
+| Demo topic | **Python for beginners** (decided 2026-10-17; replaces quantum computing) |
+| Second language [L2] | **Filipino** |
 
 ---
 
@@ -183,15 +185,16 @@ Shown on onboarding and in Controls:
 
 ## 10. Hero demo (≤ 3:00 total video; live run ≈ 2:30)
 
-Seed state: Maya's workspace with a "Quantum Computing" thread (2–3 videos, searches including a repeated one, an article, one [L2] article) and a "Kyoto Trip" thread.
+Seed state (live since 2026-10-17): Maya's workspace with 4 Python videos (one in Filipino), 8 searches (the `TypeError` search three times), an English article on `input()`/`TypeError` and a Filipino article on lists and loops — 125 memories. Questions below were checked against the real seeded moments.
 
 1. **(0:00–0:20) Problem.** "We remember the idea, not the source."
-2. **(0:20–0:50) Recall by visual memory.** Ask: "Which video showed error correction as a choir?" The step trace shows Corvus searching, then answering with a source card. Click → the real video opens at the exact second.
-3. **(0:50–1:15) Cross-app and cross-language.** Ask in [L2]: "How is that related to what I searched about decoherence?" Corvus answers in [L2], citing the English video moment, the search, and the [L2] article.
-4. **(1:15–1:40) Learning gap.** Open the thread: "You searched *decoherence* 3 times and rewatched 2:10–2:40 twice." Suggested next source shown with evidence.
-5. **(1:40–2:10) Audio recap.** Click "Make a 2-minute commute recap". Play a few seconds; chapters link back to sources.
-6. **(2:10–2:30) Real data and control.** Paste a new YouTube URL (or show a Takeout import finishing) → it becomes searchable. Delete one memory, repeat a query, show it is gone.
-7. **(2:30–2:50) Architecture overlay and close.**
+2. **(0:20–0:50) Recall across apps.** Ask: "Where did I see how to fix the TypeError when adding a number to input()?" Corvus cites the article passage, the Tech With Tim moment at **9:51**, and the repeated Google search. Click "Open at 9:51" → the real video plays from that second.
+3. **(0:50–1:15) Visual recall.** Ask: "Which video showed a tip calculator?" → Tech With Tim at **17:39** ("Full Program Example"), with what was on screen.
+4. **(1:15–1:35) Cross-language.** Ask in Filipino: "Saan ko napanood kung paano mag-install ng Python?" → answer in Filipino, citing the Filipino tutorial and English moments (0:22, 1:11).
+5. **(1:35–1:55) Learning gap (Tier 2).** "You searched *TypeError can only concatenate str* 3 times and rewatched 9:51–11:03 twice."
+6. **(1:55–2:20) Audio recap (Tier 1).** "Make a 2-minute commute recap" of the Python thread; chapters link back to sources.
+7. **(2:20–2:40) Control.** Delete the Tech With Tim video in Memory, ask the tip-calculator question again → Corvus says it can't find it (no deleted memory used). Restore.
+8. **(2:40–2:55) Architecture overlay and close.**
 
 **Wow moments:** jumping into the exact video second from a visual description; the [L2] answer citing English sources; hearing a recap made from your own history.
 
@@ -498,13 +501,22 @@ Keyboard navigation, visible focus, labelled inputs, sufficient contrast, reduce
 
 ## 17. Seed content plan
 
-### Thread A — Quantum computing (English + [L2])
+### Thread A — Learning Python (English + Filipino)
 
-- 2–3 **public, embeddable (oEmbed 200), ≤ ~20-min** YouTube videos on quantum error correction / decoherence / no-cloning. Prefer Creative Commons. At least one must contain an analogy or visual the team can ask about. (If no video has a "choir" analogy, change the demo question to match what the real video actually shows — do not invent it.)
-- Searches: "why qubits lose information", "decoherence meaning" ×3 (gap signal), "[L2] query about qubits".
-- One original English article (team-written, ~600 words) on decoherence.
-- One original [L2] article (team-written or Gemini-drafted then reviewed) on error correction.
-- Rewatch events on one span of a video (gap signal).
+Seed videos (all public, embeddable — oEmbed 200 checked 2026-10-17):
+
+| Video | Channel | Length | Language | Analysis |
+|---|---|---|---|---|
+| [M-iZsW281CE](https://www.youtube.com/watch?v=M-iZsW281CE) "Learn Python Basics in Just 20 Minutes!" | Kenji Explains | 21:38 | en | single pass |
+| [Ro_MScTDfU4](https://www.youtube.com/watch?v=Ro_MScTDfU4) "Learn Python in Only 30 Minutes" | Indently | 30:42 | en | 10-min windows (over the ~20-min limit) |
+| [UBZs0-gUZsU](https://www.youtube.com/watch?v=UBZs0-gUZsU) "Python Tutorial #1: IDE & Hello World" | SDPT Solutions | 13:37 | fil | single pass |
+| [Js05B8Z1ivE](https://www.youtube.com/watch?v=Js05B8Z1ivE) "Python Tutorial for Beginners — the basics in 20 Min" | Tech With Tim | 19:39 | en | single pass (timestamps hand-verified) |
+
+- Searches: "python print hello world", "python input returns string TypeError", "python TypeError can only concatenate str" ×3 (gap signal), "paano gumawa ng list sa python" (Filipino), "python for loop range".
+- One original English article (team-written, ~500 words) on type conversion and `input()`.
+- One original Filipino article on lists and loops (Gemini-drafted, **must be reviewed by a Filipino speaker on the team**).
+- Rewatch events on the `TypeError` / `int()` span of a video (gap signal).
+- Demo questions are written **after** reading the generated moments, so they match what the videos actually show.
 
 ### Thread B — Kyoto trip
 
@@ -591,8 +603,8 @@ tests/
 | # | Decision | Needed by |
 |---|---|---|
 | 1 | Submission deadline **time and time zone** on Oct 19 | Now |
-| 2 | Second demo language [L2] | Day 1 morning (seed content) |
-| 3 | Which real YouTube videos to seed (licence + embeddable) and the exact demo question that matches them | Day 1 morning |
+| 2 | ~~Second demo language~~ Filipino (decided) | Done |
+| 3 | ~~Seed videos~~ decided (§17); demo questions to write after seeding | Day 1 |
 | 4 | Google Cloud project ID, billing, region | Day 0 |
 | 5 | Demo workspace: per-visitor overlay vs shared + reset button | Day 1 |
 | 6 | GitHub owner and visibility | Day 0 |

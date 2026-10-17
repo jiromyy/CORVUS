@@ -1,0 +1,300 @@
+{
+  "title": "Python Tutorial For Beginners",
+  "summary": "This beginner Python tutorial covers core concepts from installation to programming basics. Topics include variables, data types, string manipulation, user input, lists, conditionals, loops, and functions.",
+  "language": "en",
+  "topics": [
+    "Python",
+    "Programming Tutorial",
+    "VS Code",
+    "Variables",
+    "Data Types",
+    "Conditionals",
+    "Loops",
+    "Functions"
+  ],
+  "moments": [
+    {
+      "startSeconds": 0,
+      "endSeconds": 22,
+      "spokenSummary": "The speaker introduces a quick beginner Python tutorial covering core programming essentials.",
+      "visualDescription": "Title card displaying 'PYTHON TUTORIAL FOR BEGINNERS' followed by the presenter introducing the course roadmap.",
+      "keyTerms": [
+        "Python",
+        "tutorial",
+        "variables",
+        "lists",
+        "loops",
+        "functions"
+      ]
+    },
+    {
+      "startSeconds": 22,
+      "endSeconds": 63,
+      "spokenSummary": "Instructions are provided on downloading and installing Python from the official website.",
+      "visualDescription": "Web browser navigating python.org/downloads and executing the installer with 'Add python.exe to PATH' selected.",
+      "keyTerms": [
+        "python.org",
+        "Add python.exe to PATH",
+        "Install Now"
+      ]
+    },
+    {
+      "startSeconds": 63,
+      "endSeconds": 105,
+      "spokenSummary": "The host explains downloading and launching Visual Studio Code as the code editor.",
+      "visualDescription": "Navigating code.visualstudio.com, downloading VS Code for Windows, and opening the application.",
+      "keyTerms": [
+        "VS Code",
+        "Visual Studio Code",
+        "IDE"
+      ]
+    },
+    {
+      "startSeconds": 105,
+      "endSeconds": 134,
+      "spokenSummary": "Guidance is given on creating and opening a dedicated project folder inside VS Code.",
+      "visualDescription": "Using the File menu to select 'Open Folder' and creating a folder named 'Demo'.",
+      "keyTerms": [
+        "Open Folder",
+        "Demo",
+        "Explorer view"
+      ]
+    },
+    {
+      "startSeconds": 134,
+      "endSeconds": 161,
+      "spokenSummary": "The speaker shows how to install the official Python extension from Microsoft in VS Code.",
+      "visualDescription": "Extensions marketplace searched for 'python' and installing the official Microsoft Python extension.",
+      "keyTerms": [
+        "Extensions",
+        "Python extension",
+        "Microsoft"
+      ]
+    },
+    {
+      "startSeconds": 161,
+      "endSeconds": 191,
+      "spokenSummary": "The process of creating a new Python script with the .py file extension is demonstrated.",
+      "visualDescription": "Clicking new file in Explorer and naming it 'demo.py'.",
+      "keyTerms": [
+        "demo.py",
+        ".py",
+        "Explorer"
+      ]
+    },
+    {
+      "startSeconds": 191,
+      "endSeconds": 231,
+      "spokenSummary": "The presenter explains the print function and writes a Hello World statement.",
+      "visualDescription": "Typing print(\"hello world\") in the editor with tooltips explaining console output.",
+      "keyTerms": [
+        "print",
+        "\"hello world\"",
+        "function",
+        "console"
+      ]
+    },
+    {
+      "startSeconds": 231,
+      "endSeconds": 279,
+      "spokenSummary": "Methods to execute the Python script using the play button or terminal commands are demonstrated.",
+      "visualDescription": "Clicking 'Run Python File' and running 'python demo.py' inside the integrated terminal.",
+      "keyTerms": [
+        "Run Python File",
+        "Terminal",
+        "python demo.py"
+      ]
+    },
+    {
+      "startSeconds": 279,
+      "endSeconds": 345,
+      "spokenSummary": "The instructor introduces variables and basic data types including strings, integers, floats, and booleans.",
+      "visualDescription": "Code defining name, age, height, and is_learning with annotations for data types.",
+      "keyTerms": [
+        "variable",
+        "string",
+        "int",
+        "float",
+        "boolean",
+        "True",
+        "False"
+      ]
+    },
+    {
+      "startSeconds": 345,
+      "endSeconds": 386,
+      "spokenSummary": "Displaying variable values and checking their underlying types using type() is explained.",
+      "visualDescription": "Printing combinations of variables and calling print(type(name)) and print(type(height)).",
+      "keyTerms": [
+        "print",
+        "type()",
+        "<class 'str'>",
+        "<class 'float'>"
+      ]
+    },
+    {
+      "startSeconds": 386,
+      "endSeconds": 456,
+      "spokenSummary": "A brief overview and recommendation of DataCamp's interactive Python curriculum are shared.",
+      "visualDescription": "DataCamp website showing 'Python Programming Fundamentals' and career track details.",
+      "keyTerms": [
+        "DataCamp",
+        "Python Programming Fundamentals",
+        "Associate Python Developer"
+      ]
+    },
+    {
+      "startSeconds": 456,
+      "endSeconds": 520,
+      "spokenSummary": "String concatenation using the addition operator is explained with examples.",
+      "visualDescription": "Concatenating first_name, space, and last_name in a print statement.",
+      "keyTerms": [
+        "concatenation",
+        "first_name",
+        "last_name",
+        "+"
+      ]
+    },
+    {
+      "startSeconds": 520,
+      "endSeconds": 557,
+      "spokenSummary": "The host shows how to use f-strings for cleaner inline variable formatting.",
+      "visualDescription": "Creating formatted text message = f\"Hi, my name is {first_name} and I am {age} years old.\"",
+      "keyTerms": [
+        "f-strings",
+        "{first_name}",
+        "{age}",
+        "message"
+      ]
+    },
+    {
+      "startSeconds": 557,
+      "endSeconds": 591,
+      "spokenSummary": "The input function is introduced to capture interactive user responses dynamically.",
+      "visualDescription": "Writing user_name = input(\"What is your name? \") and prompting user input in terminal.",
+      "keyTerms": [
+        "input()",
+        "user_name",
+        "terminal"
+      ]
+    },
+    {
+      "startSeconds": 591,
+      "endSeconds": 663,
+      "spokenSummary": "A TypeError caused by adding an integer to string input is resolved using int() conversion.",
+      "visualDescription": "Terminal shows TypeError: can only concatenate str to str, fixed by wrapping input with int().",
+      "keyTerms": [
+        "TypeError",
+        "int()",
+        "type conversion",
+        "user_age"
+      ]
+    },
+    {
+      "startSeconds": 663,
+      "endSeconds": 715,
+      "spokenSummary": "Lists and zero-based index referencing in Python are explained.",
+      "visualDescription": "Defining groceries = [\"apples\", \"bread\", \"milk\"] and indexing via groceries[0] and groceries[2].",
+      "keyTerms": [
+        "list",
+        "groceries",
+        "index",
+        "brackets"
+      ]
+    },
+    {
+      "startSeconds": 715,
+      "endSeconds": 756,
+      "spokenSummary": "Adding items to lists via append and checking list length using len are covered.",
+      "visualDescription": "Writing groceries.append(\"carrot\") and printing len(groceries) in the terminal.",
+      "keyTerms": [
+        "append()",
+        "len()",
+        "groceries"
+      ]
+    },
+    {
+      "startSeconds": 756,
+      "endSeconds": 810,
+      "spokenSummary": "Conditionals and code indentation rules using if and else statements are explained.",
+      "visualDescription": "Evaluating if age >= 18 with indented print statements and highlighting indentation blocks.",
+      "keyTerms": [
+        "if",
+        "else",
+        "indentation",
+        "age >= 18"
+      ]
+    },
+    {
+      "startSeconds": 810,
+      "endSeconds": 877,
+      "spokenSummary": "Multi-way conditional branching using elif statements is demonstrated.",
+      "visualDescription": "Expanding code with elif age >= 18 and changing age values to trigger each branch.",
+      "keyTerms": [
+        "elif",
+        "Senior",
+        "Adult",
+        "Minor"
+      ]
+    },
+    {
+      "startSeconds": 877,
+      "endSeconds": 947,
+      "spokenSummary": "For loops are introduced to iterate over items in a list.",
+      "visualDescription": "Looping through groceries list using 'for item in groceries:' and printing each item.",
+      "keyTerms": [
+        "for loop",
+        "item",
+        "in",
+        "groceries"
+      ]
+    },
+    {
+      "startSeconds": 947,
+      "endSeconds": 973,
+      "spokenSummary": "Using the range function in a for loop to iterate over numeric sequences is shown.",
+      "visualDescription": "Running 'for number in range(5):' and displaying outputs 0 through 4.",
+      "keyTerms": [
+        "range()",
+        "number",
+        "for loop"
+      ]
+    },
+    {
+      "startSeconds": 973,
+      "endSeconds": 1059,
+      "spokenSummary": "The definition, parameters, arguments, and return values of functions are explained.",
+      "visualDescription": "Defining greet(name) and add(a, b) with return statement, then calling them with arguments.",
+      "keyTerms": [
+        "def",
+        "function",
+        "parameter",
+        "argument",
+        "return"
+      ]
+    },
+    {
+      "startSeconds": 1059,
+      "endSeconds": 1142,
+      "spokenSummary": "A complete tip calculator program combining functions, inputs, math, and formatted outputs is built.",
+      "visualDescription": "Script calculate_tip running in terminal with input prompts for bill and tip percentage.",
+      "keyTerms": [
+        "calculate_tip",
+        "bill_amount",
+        "tip_percent",
+        "float()"
+      ]
+    },
+    {
+      "startSeconds": 1142,
+      "endSeconds": 1179,
+      "spokenSummary": "The host recaps all foundational concepts covered and concludes the tutorial.",
+      "visualDescription": "Summary list on screen highlighting installed tools and core syntax covered, followed by channel end screen.",
+      "keyTerms": [
+        "Python tutorial",
+        "summary",
+        "Tech With Tim"
+      ]
+    }
+  ]
+}

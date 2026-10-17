@@ -1,0 +1,341 @@
+{
+  "title": "Python for Beginners - Setup and Basic Syntax",
+  "summary": "This beginner-friendly Python tutorial guides viewers through setting up Anaconda and Jupyter Notebook. It covers foundational programming concepts including printing, user inputs, variables, type casting, and conditional statements.",
+  "language": "en",
+  "topics": [
+    "Python",
+    "Anaconda",
+    "Jupyter Notebook",
+    "Programming Basics",
+    "Conditionals",
+    "Conditional Statements",
+    "Pandas",
+    "Data Analysis",
+    "JupyterLab",
+    "pandas",
+    "Data Visualization",
+    "Seaborn"
+  ],
+  "moments": [
+    {
+      "startSeconds": 0,
+      "endSeconds": 33,
+      "spokenSummary": "The instructor outlines the hands-on roadmap: setup, basic code, data analysis, and visualization.",
+      "visualDescription": "Instructor speaking to camera with graphic overlays showing code samples, scatter plots, and four tutorial stages.",
+      "keyTerms": [
+        "Python",
+        "Setup",
+        "Basic Code",
+        "Analysis",
+        "Visualization"
+      ]
+    },
+    {
+      "startSeconds": 33,
+      "endSeconds": 71,
+      "spokenSummary": "The instructor demonstrates downloading Anaconda from anaconda.com to run Python and Jupyter Notebook.",
+      "visualDescription": "Web browser showing the Anaconda website, navigating to the free download page and skipping registration.",
+      "keyTerms": [
+        "anaconda.com",
+        "Free Download",
+        "Anaconda"
+      ]
+    },
+    {
+      "startSeconds": 71,
+      "endSeconds": 104,
+      "spokenSummary": "The instructor guides through the Anaconda installation wizard steps and completes the installation.",
+      "visualDescription": "Windows installer window for Anaconda progressing through terms, install options, location settings, and progress bar.",
+      "keyTerms": [
+        "Anaconda3",
+        "Install",
+        "Finish"
+      ]
+    },
+    {
+      "startSeconds": 104,
+      "endSeconds": 138,
+      "spokenSummary": "The instructor opens Anaconda Navigator and launches Jupyter Notebook to prepare for coding.",
+      "visualDescription": "Windows search menu opening Anaconda Navigator, followed by launching Jupyter Notebook from the dashboard.",
+      "keyTerms": [
+        "Anaconda Navigator",
+        "Jupyter Notebook",
+        "Kernel"
+      ]
+    },
+    {
+      "startSeconds": 138,
+      "endSeconds": 177,
+      "spokenSummary": "The instructor explains the advantage of code editors over plain text tools like Notepad and shows how to add cells in Jupyter.",
+      "visualDescription": "Notepad window comparison followed by Jupyter interface highlighting cell creation and deletion buttons.",
+      "keyTerms": [
+        "Notepad",
+        "JupyterLab",
+        "Cells"
+      ]
+    },
+    {
+      "startSeconds": 177,
+      "endSeconds": 211,
+      "spokenSummary": "The instructor writes the first Python command using the print function and executes it with Shift + Enter.",
+      "visualDescription": "Jupyter Notebook cell containing code `print(\"welcome to python\")` and executing to show output.",
+      "keyTerms": [
+        "print",
+        "Shift + Enter"
+      ]
+    },
+    {
+      "startSeconds": 211,
+      "endSeconds": 250,
+      "spokenSummary": "The instructor demonstrates receiving user input using the input function and discusses the need for variables.",
+      "visualDescription": "Jupyter Notebook running `input(\"what is your name?\")` prompting an input box with the entered text 'bill'.",
+      "keyTerms": [
+        "input",
+        "Variables"
+      ]
+    },
+    {
+      "startSeconds": 250,
+      "endSeconds": 302,
+      "spokenSummary": "Variables for name and age are declared, assigned via input, and then displayed together using print.",
+      "visualDescription": "Jupyter cell showing variable assignments `name = input(...)` and `age = input(...)` followed by `print(name, age)`.",
+      "keyTerms": [
+        "name",
+        "age",
+        "input",
+        "print"
+      ]
+    },
+    {
+      "startSeconds": 302,
+      "endSeconds": 371,
+      "spokenSummary": "The instructor attempts a comparison condition, encounters a TypeError between string and int, and resolves it with int().",
+      "visualDescription": "Code cell with `age >= 21` causing `TypeError: '>=' not supported between instances of 'str' and 'int'`, fixed by wrapping input with `int()`.",
+      "keyTerms": [
+        "age",
+        "TypeError",
+        "str",
+        "int"
+      ]
+    },
+    {
+      "startSeconds": 371,
+      "endSeconds": 433,
+      "spokenSummary": "The instructor constructs an if-else statement to check age eligibility and print corresponding conditional messages.",
+      "visualDescription": "Jupyter Notebook showing code block with `if age >= 21:` and `else:` statements, successfully outputting 'bill is allowed in'.",
+      "keyTerms": [
+        "if",
+        "else",
+        "print",
+        "age"
+      ]
+    },
+    {
+      "startSeconds": 433,
+      "endSeconds": 456,
+      "spokenSummary": "The speaker demonstrates running the conditional check with an underage input where access is denied. He then suggests introducing a third variable to simulate VIP club admission.",
+      "visualDescription": "JupyterLab notebook cell executing an input prompt with Michael, age 20, outputting 'Michael is not allowed in', followed by the presenter talking to the camera.",
+      "keyTerms": [
+        "input",
+        "int",
+        "print",
+        "else"
+      ]
+    },
+    {
+      "startSeconds": 456,
+      "endSeconds": 514,
+      "spokenSummary": "The instructor clears previous cells and adds a new input variable called 'member', using string methods to normalize the user's response to lowercase.",
+      "visualDescription": "In JupyterLab, deleting unwanted cells and coding 'member = input(\"Are you a member (yes/no)?\").lower() == \"yes\"'. Testing input with Bill, 30, yes.",
+      "keyTerms": [
+        "member",
+        "lower()",
+        "input()"
+      ]
+    },
+    {
+      "startSeconds": 514,
+      "endSeconds": 584,
+      "spokenSummary": "The instructor updates the if-elif-else logic to handle cases where an attendee is of age and a member, of age but not a member, or underage.",
+      "visualDescription": "Modifying Python code with 'if age >= 21 and member:', 'elif age >= 21 and not member:', and 'elif age < 21:'. Running the cell shows Bill is allowed in as VIP.",
+      "keyTerms": [
+        "and",
+        "not",
+        "elif",
+        "VIP"
+      ]
+    },
+    {
+      "startSeconds": 584,
+      "endSeconds": 650,
+      "spokenSummary": "A coding challenge is presented to add a fourth variable checking if the user is part of a group, which grants VIP access. The presenter demonstrates the solution.",
+      "visualDescription": "Challenge callout graphic appears, then instructor adds 'group = input(...).lower() == \"yes\"' and an 'elif age >= 21 and group:' condition in JupyterLab.",
+      "keyTerms": [
+        "group",
+        "elif",
+        "and"
+      ]
+    },
+    {
+      "startSeconds": 650,
+      "endSeconds": 709,
+      "spokenSummary": "The video transitions to Part 3 on data analysis, introducing a taxi dataset and demonstrating how to import and install Pandas.",
+      "visualDescription": "Title card 'Part 3 Analysis', Excel spreadsheet displaying taxi ride data, followed by typing 'import pandas as pd' and showing pip install syntax.",
+      "keyTerms": [
+        "Pandas",
+        "import pandas as pd",
+        "pip install pandas"
+      ]
+    },
+    {
+      "startSeconds": 709,
+      "endSeconds": 770,
+      "spokenSummary": "The instructor shows how to read an Excel file into a Pandas DataFrame using pd.read_excel and assigns it to variable df.",
+      "visualDescription": "Writing 'df = pd.read_excel(r\"Downloads\\taxis_Data.xlsx\")' and executing it, displaying the resulting table with 6,433 rows and 14 columns.",
+      "keyTerms": [
+        "pd.read_excel",
+        "df",
+        "DataFrame"
+      ]
+    },
+    {
+      "startSeconds": 770,
+      "endSeconds": 801,
+      "spokenSummary": "The speaker demonstrates using the describe method on the DataFrame to view summary statistical measures like count, mean, min, and max.",
+      "visualDescription": "Typing and executing 'df.describe()', displaying statistical summary columns such as count, mean, 25%, 50%, 75%, and max across numerical taxi ride attributes.",
+      "keyTerms": [
+        "df.describe()",
+        "count",
+        "mean"
+      ]
+    },
+    {
+      "startSeconds": 801,
+      "endSeconds": 839,
+      "spokenSummary": "Addressing a simulated manager question, the instructor uses groupby and count to see available payment types and their frequency.",
+      "visualDescription": "A prompt banner appears asking 'What are the payment types taxis have?'. Instructor writes and runs 'df.groupby(\"payment\").count()', showing counts for cash and credit card.",
+      "keyTerms": [
+        "groupby",
+        "count()",
+        "payment"
+      ]
+    },
+    {
+      "startSeconds": 839,
+      "endSeconds": 866,
+      "spokenSummary": "The manager asks for the average fare by passenger count, prompting the instructor to start writing a groupby operation targeting the fare column.",
+      "visualDescription": "Prompt banner asks 'What's the average fare by number of passengers?'. Code cell being typed with 'df.groupby([\"passengers\"])' and accessing the fare column.",
+      "keyTerms": [
+        "df.groupby",
+        "passengers",
+        "fare"
+      ]
+    },
+    {
+      "startSeconds": 866,
+      "endSeconds": 908,
+      "spokenSummary": "The instructor demonstrates calculating the average fare grouped by passenger count using pandas mean function and addresses an initial syntax error.",
+      "visualDescription": "In JupyterLab, code is written: `df.groupby(\"passengers\")[\"fare\"].mean()`. After correcting an extra dot syntax error, the output shows mean fares for passenger counts 0 through 6.",
+      "keyTerms": [
+        "df.groupby",
+        "mean()",
+        "passengers",
+        "fare",
+        "SyntaxError"
+      ]
+    },
+    {
+      "startSeconds": 908,
+      "endSeconds": 932,
+      "spokenSummary": "A quiz prompt asks to compute average fare by taxi color, followed by demonstrating the solution in code.",
+      "visualDescription": "The instructor appears on camera presenting the quiz prompt 'What's the average fare by taxi color?', then switches to JupyterLab executing `df.groupby(\"color\")[\"fare\"].mean()` showing results for green and yellow taxis.",
+      "keyTerms": [
+        "df.groupby",
+        "color",
+        "fare",
+        "mean()"
+      ]
+    },
+    {
+      "startSeconds": 932,
+      "endSeconds": 966,
+      "spokenSummary": "The instructor discusses finding the top fares, initially showing how the `max()` function extracts the single highest fare.",
+      "visualDescription": "A prompt from 'Manager' asks 'What are the 10 highest fares on this dataset?'. The instructor writes `df[\"fare\"].max()` in JupyterLab, resulting in an output of 150.0.",
+      "keyTerms": [
+        "max()",
+        "df",
+        "fare"
+      ]
+    },
+    {
+      "startSeconds": 966,
+      "endSeconds": 1007,
+      "spokenSummary": "To obtain the top 10 highest fares, the instructor introduces the `nlargest()` function and filters down to the fare column.",
+      "visualDescription": "In JupyterLab, `df.nlargest(10, \"fare\")[\"fare\"]` is entered and run, returning the top 10 rows descending from 150.0 to 87.5.",
+      "keyTerms": [
+        "nlargest()",
+        "df.nlargest",
+        "fare"
+      ]
+    },
+    {
+      "startSeconds": 1007,
+      "endSeconds": 1058,
+      "spokenSummary": "The video transitions to data visualization, where the instructor demonstrates installing and importing Seaborn and Matplotlib.",
+      "visualDescription": "A title card 'Part 4 Visualization' is displayed, followed by JupyterLab where `!pip install seaborn matplotlib` and import statements (`import seaborn as sns`, `import matplotlib.pyplot as plt`) are executed.",
+      "keyTerms": [
+        "!pip install",
+        "seaborn",
+        "matplotlib",
+        "sns",
+        "plt"
+      ]
+    },
+    {
+      "startSeconds": 1058,
+      "endSeconds": 1125,
+      "spokenSummary": "The instructor creates a histogram to show fare price distribution and explains adjusting the number of bins.",
+      "visualDescription": "Manager prompt requests a chart of fare distribution. In JupyterLab, `sns.histplot(df[\"fare\"], bins=30)` is executed, rendering a histogram chart of fare counts.",
+      "keyTerms": [
+        "sns.histplot",
+        "df",
+        "fare",
+        "bins"
+      ]
+    },
+    {
+      "startSeconds": 1125,
+      "endSeconds": 1198,
+      "spokenSummary": "The instructor generates a scatter plot using Seaborn to investigate whether there is a correlation between taxi fare and distance.",
+      "visualDescription": "Manager prompt asks about relationship between fares and distances. `sns.scatterplot(x=\"distance\", y=\"fare\", data=df)` is executed, displaying a scatter plot showing an upward trend between trip distance and fare.",
+      "keyTerms": [
+        "sns.scatterplot",
+        "distance",
+        "fare",
+        "data=df"
+      ]
+    },
+    {
+      "startSeconds": 1198,
+      "endSeconds": 1221,
+      "spokenSummary": "The instructor navigates to Seaborn's official gallery website to show users where to explore additional chart examples and their source code.",
+      "visualDescription": "The web browser displays the Seaborn example gallery page (`seaborn.pydata.org/examples/index.html`), clicking on a displot example to reveal the code.",
+      "keyTerms": [
+        "seaborn",
+        "gallery",
+        "displot"
+      ]
+    },
+    {
+      "startSeconds": 1221,
+      "endSeconds": 1298,
+      "spokenSummary": "The instructor concludes the session by giving an overview of the full Career Principles Python for Data Analysis curriculum and recommending subsequent learning paths.",
+      "visualDescription": "The Career Principles course syllabus is showcased, reviewing modules including basic syntax, flow control, case studies on stock prices and crime data, machine learning, and interview prep, ending with channel subscription links.",
+      "keyTerms": [
+        "Python for Data Analysis",
+        "Career Principles",
+        "Machine Learning"
+      ]
+    }
+  ]
+}
