@@ -15,7 +15,10 @@
     "spike:tts": "tsx --env-file-if-exists=.env.local spikes/3-tts.ts",
     "spike:tools": "tsx --env-file-if-exists=.env.local spikes/4-function-calling.ts",
     "spike:firestore": "tsx --env-file-if-exists=.env.local spikes/5-firestore-vector.ts",
-    "seed": "tsx --env-file-if-exists=.env.local scripts/seed-demo.ts"
+    "seed": "tsx --env-file-if-exists=.env.local scripts/seed-demo.ts",
+    "ext:zip": "powershell -NoProfile -Command \"Compress-Archive -Force -Path extension/* -DestinationPath public/corvus-capture.zip\"",
+    "seed:catalog": "tsx --env-file-if-exists=.env.local scripts/seed-catalog.ts",
+    "seed:recap": "tsx --env-file-if-exists=.env.local scripts/seed-recap.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.4.0",

@@ -1,11 +1,12 @@
-import { getHiddenMemoryIds, listMemories } from "@/lib/db/store";
-import { getWorkspace } from "@/lib/workspace";
+import { listMemories } from "@/lib/db/store";
+import { getScope } from "@/lib/workspace";
 
 export async function GET() {
-  const ws = await getWorkspace();
-  const [memories, hidden] = await Promise.all([listMemories([ws.demoId, ws.id]), getHiddenMemoryIds(ws.id)]);
+  const { ws, workspaceIds, hidden, includeSample } = await getScope();
+  const memories = await listMemories(workspaceIds);
   return Response.json({
     workspaceId: ws.id,
+    includeSample,
     hiddenCount: hidden.size,
     memories: memories.filter((m) => !hidden.has(m.id)),
   });

@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Corvus Capture",
+  "version": "0.1.0",
+  "description": "Remembers the YouTube videos you watch and the Google searches you make in your private Corvus memory. Hackathon prototype; not a Google product.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://corvus-378059077328.asia-southeast1.run.app/*",
+    "http://localhost:3000/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    { "matches": ["https://www.youtube.com/*"], "js": ["youtube.js"], "run_at": "document_idle" },
+    {
+      "matches": ["https://www.google.com/search*", "https://www.google.com.ph/search*"],
+      "js": ["google.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_popup": "popup.html", "default_title": "Corvus Capture" }
+}

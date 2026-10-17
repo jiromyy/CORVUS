@@ -98,8 +98,8 @@ Demo language pairing: English plus **Filipino** (decided 2026-10-17). Examples 
 | Product name | **Corvus** (assistant also "Corvus"). Disclosure: "Corvus is a hackathon concept and is not a Google product." |
 | Deadline | October 19, 2026 |
 | Team | All developers; Next.js + TypeScript |
-| Data in | Hybrid: seeded demo user + real capture by URL + Google Takeout import |
-| Approved features | Memory Threads, audio recap, Learning Gap Detector, cross-language recall, agentic Ask Corvus |
+| Data in | Seeded demo user + Google Takeout import (past) + Chrome extension (automatic, going forward). Revised 2026-10-18 |
+| Approved features | Revised 2026-10-18 — see §8 Tier 1: time-aware Ask + weekly summary, Takeout, Chrome extension, For you now (focus, context, suggestions), audio recap |
 | Hosting | Single Next.js service on Cloud Run |
 | Data | Cloud Firestore (with vector search); Cloud Storage for audio |
 | AI | Gemini on Vertex AI via `@google/genai`: generation, video understanding, embeddings, TTS |
@@ -124,20 +124,27 @@ Demo language pairing: English plus **Filipino** (decided 2026-10-17). Examples 
 - **Cross-language recall** (comes almost free with multilingual embeddings; needs one [L2] seed item and an [L2] demo question).
 - A "sample data" label on the seeded workspace and the not-a-Google-product disclosure.
 
-### Tier 1 — the "wow" (build next, in this order)
+### Tier 1 — revised 2026-10-18 (team intent: proactive, context-aware, automatic)
 
-1. **Audio recap** — Gemini writes a short script from a thread's memories, Gemini TTS voices it, playback shows source chapters.
-2. **Memory Threads** — topic groups with a summary, source trail, and timeline.
-3. **Add by URL (real capture)** — paste a YouTube or article URL; Corvus ingests it live.
+Intent: make content intake meaningful from the user's own footprints. Corvus should (a) answer questions about past activity, including time ranges, (b) notice what the user is focused on and suggest what helps next, (c) adapt to context (study, commute, rest), and (d) capture activity automatically.
 
-### Tier 2 — strong extras
+Build order:
 
-4. **Learning Gap Detector** — concepts the user keeps returning to, with evidence and a suggested next source.
-5. **Google Takeout import** — upload YouTube watch history and Search activity JSON into a private workspace.
+1. **Time-aware Ask + "Summarise my week".** Date filters on `search_memories`; new `summarize_activity(from, to)` tool. Dates interpreted in Asia/Manila.
+2. **Google Takeout import (real past data).** Files parsed **in the browser**; only title, URL, time, query, channel for the last 90 days are sent to Cloud Run (raw files never leave the device; avoids the 32 MB request limit). Title-level memories for every item; full moment analysis for the 10 most recent videos (progress shown; "Analyse" on demand for others). "Show sample data" toggle and "Delete my workspace".
+3. **Chrome extension (automatic capture going forward).** Manifest V3; captures YouTube watches (after 30 s of playback) and Google searches (+ clicked results) and sends them to Corvus with a pairing code; on/off switch; nothing captured on other sites. Replaces "Add by URL".
+4. **For you now.** Inferred focus from recent activity (labelled *inferred*, correctable); context chips **Study / Commute / Rest** chosen by the user (time of day only pre-selects, never claims); suggestions with "Why this?" from (a) the user's own history (revisit a rewatched moment, a repeated search = gap) and (b) a **curated catalogue** of public videos, podcasts, and music playlists (decision 2026-10-18: option a). Travel is not detected from location — the user picks Commute.
+5. **Audio recap** — Gemini script with memory IDs per chapter, Gemini TTS, chapters link to sources; offered as the Commute suggestion.
+
+Folded/cut: Memory Threads page → part of inferred focus; Learning Gap Detector → a suggestion type; Add by URL → replaced by the extension.
 
 ### Cut order if behind schedule
 
-Cut from the bottom: Takeout import → Gap Detector → automatic thread assignment for new items (keep seeded threads) → Add by URL. **Never cut Tier 0.**
+Cut from the bottom: audio recap → catalogue suggestions (keep history-based ones) → extension (keep Takeout) → Takeout. **Never cut Tier 0.**
+
+### Production path (pitch, not built)
+
+Automatic import through Google's **Data Portability API** (OAuth, user-consented My Activity access) where Google makes it available — currently limited to supported regions and requiring Google app approval — or as a native Google feature. Until then: Takeout for history + extension for live capture.
 
 ### Explicit non-goals
 

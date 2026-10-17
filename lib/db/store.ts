@@ -121,7 +121,43 @@ export async function deactivateMemory(id: string) {
 
 // ---------- workspaces ----------
 
-type WorkspaceDoc = { createdAt: string; hiddenMemoryIds?: string[] };
+type WorkspaceDoc = { createdAt: string; hiddenMemoryIds?: string[]; includeSample?: boolean; focusOverride?: string | null };
+
+export type WorkspaceState = { hidden: Set<string>; includeSample: boolean; focusOverride?: string };
+
+/** Hidden demo memories and whether Maya's sample data is shown alongside the visitor's own. */
+export async function getWorkspaceState(workspaceId: string): Promise<WorkspaceState> {
+  const doc = (await getDb().collection(WORKSPACES).doc(workspaceId).get()).data() as WorkspaceDoc | undefined;
+  return {
+    hidden: new Set(doc?.hiddenMemoryIds ?? []),
+    includeSample: doc?.includeSample ?? true,
+    focusOverride: doc?.focusOverride ?? undefined,
+  };
+}
+
+/** The user's correction of the inferred focus; null goes back to inferring. */
+export async function setFocusOverride(workspaceId: string, focusOverride: string | null) {
+  await getDb().collection(WORKSPACES).doc(workspaceId).set({ focusOverride }, { merge: true });
+}
+
+export async function setIncludeSample(workspaceId: string, includeSample: boolean) {
+  await getDb().collection(WORKSPACES).doc(workspaceId).set({ includeSample }, { merge: true });
+}
+
+/** Deletes every memory and event of a workspace and resets its settings. */
+export async function deleteWorkspaceData(workspaceId: string) {
+  invalidateMemoryCache();
+  const db = getDb();
+  for (const name of [MEMORIES, "events", "extension_tokens"]) {
+    const snap = await db.collection(name).where("workspaceId", "==", workspaceId).select().get();
+    for (let i = 0; i < snap.docs.length; i += 400) {
+      const batch = db.batch();
+      snap.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    }
+  }
+  await db.collection(WORKSPACES).doc(workspaceId).set({ createdAt: new Date().toISOString(), hiddenMemoryIds: [], includeSample: true });
+}
 
 export async function ensureWorkspace(id: string) {
   const ref = getDb().collection(WORKSPACES).doc(id);

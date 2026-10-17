@@ -35,3 +35,20 @@ export const embedUrl = (id: string, seconds = 0, autoplay = false) =>
 export const thumbnailUrl = (id: string) => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
 
 export const youtubeContentId = (id: string) => `yt_${id}`;
+
+/**
+ * Best-effort video length from the public watch page (Takeout and the extension do not include it).
+ * Server-side only. Returns undefined if YouTube changes its page.
+ */
+export async function fetchYouTubeDuration(id: string): Promise<number | undefined> {
+  try {
+    const res = await fetch(watchUrl(id), {
+      headers: { "Accept-Language": "en", "User-Agent": "Mozilla/5.0" },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const match = /"lengthSeconds":"(\d+)"/.exec(await res.text());
+    return match ? Number(match[1]) : undefined;
+  } catch {
+    return undefined;
+  }
+}

@@ -41,6 +41,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">Ask</Link>
             <Link href="/library" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">Memory</Link>
+            <Link href="/recap" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">Recap</Link>
+            <Link href="/import" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">Import</Link>
           </nav>
         </header>
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:py-12">{children}</main>

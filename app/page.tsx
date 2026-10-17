@@ -1,4 +1,5 @@
 import { AskPanel } from "@/components/AskPanel";
+import { ForYouPanel } from "@/components/ForYouPanel";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <div className="mt-8">
         <AskPanel />
       </div>
+      <ForYouPanel />
     </div>
   );
 }

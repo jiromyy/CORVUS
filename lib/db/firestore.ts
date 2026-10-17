@@ -12,5 +12,7 @@ export function getDb(): Firestore {
     getApps()[0] ??
     initializeApp({ credential: applicationDefault(), projectId: env.GOOGLE_CLOUD_PROJECT });
   db = getFirestore(app, env.FIRESTORE_DATABASE);
+  // Optional fields (e.g. startSeconds on an article) are simply omitted instead of failing the write.
+  db.settings({ ignoreUndefinedProperties: true });
   return db;
 }

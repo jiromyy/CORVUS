@@ -109,21 +109,18 @@ Scripts are written (`spikes/`, run with `npm run spike:*`); they still need a c
 
 ---
 
-## 6. Day 2 — Sunday Oct 18 (Tier 1 → Tier 2 → freeze)
+## 6. Day 2 — Sunday Oct 18 (revised Tier 1 → freeze)
 
-### Tier 1 (morning to early afternoon)
+Scope revised 2026-10-18 to match the team's intent (spec §8): proactive, context-aware, automatic capture.
 
-- [ ] D: audio recap — script generation with memory IDs, TTS, WAV/MP3 to Cloud Storage, chapters; pre-generated demo recap in seed.
-- [ ] C: recap player with chapters linking to sources; thread page complete.
-- [ ] A: Add by URL — YouTube and article capture with progress status, content-level analysis cache.
-- [ ] B: `create_audio_recap` and `get_thread` tools wired into the agent.
+- [x] 1. Time-aware Ask: date filters on search; `summarize_activity(from, to)` tool ("summarise my week").
+- [x] 2. Takeout import: in-browser parsing (last 90 days, minimal fields), `/api/import/takeout`, analyse 10 most recent videos with progress, sample-data toggle, delete my workspace.
+- [x] 3. Chrome extension (MV3): pairing code, YouTube watch + Google search/click capture, pause switch, `/api/capture`.
+- [x] 4. For you now: inferred focus (correctable), Study/Commute/Rest chips, suggestions with "Why this?" from history + curated catalogue.
+- [x] 5. Audio recap: script with memory IDs, Gemini TTS, chapters; Commute suggestion.
+- [ ] 10-question eval script (3 in Filipino, 2 unanswerable).
 
-### Tier 2 (afternoon, only if Tier 1 is deployed and working)
-
-- [ ] D: Learning Gap Detector (signals + Gemini) and gaps panel.
-- [ ] A: Takeout import (JSON files; deep-analyse 10 most recent videos).
-- [ ] C: Add/Import screen with Takeout export instructions; Controls screen (delete/reset workspace).
-- [ ] B: 10-question eval script (3 in [L2], 2 unanswerable).
+Cut order if behind: audio recap → catalogue suggestions → extension → Takeout. Tier 0 never.
 
 ### Freeze (20:00 local)
 
@@ -192,6 +189,7 @@ GitHub repo:                TBD
 | 2026-10-17 | Agent model gemini-3.5-flash; video model gemini-3.8-flash (pending); TTS gemini-2.5-flash-tts; embeddings gemini-embedding-2 @ 768 | Day-0 spike results (see §4) |
 | 2026-10-17 | Video analysis: MM:SS timestamps, low media resolution, seed videos ≤ ~20 min and embeddable (oEmbed 200) | Accuracy hand-checked on a 20-min tutorial; a 60-min lecture was partly inaccurate |
 | 2026-10-17 | Demo topic Python for beginners; second language Filipino; 4 seed videos (spec §17) | Team decision |
+| 2026-10-18 | Tier 1 revised: time-aware Ask + weekly summary, Takeout, Chrome extension, For you now (curated catalogue, user-chosen context), audio recap. Threads/Gap Detector folded in; Add by URL replaced by extension | Team intent: proactive, context-aware, automatic capture; no Google API gives watch/search history outside Data Portability API regions |
 
 ---
 
@@ -218,12 +216,13 @@ GitHub repo:                TBD
 | 2026-10-16 | Day 0 | Next.js app scaffolded at repo root; env validation, Gemini and Firestore clients, shared Zod schemas + citation validator, `/api/health`, landing page, Dockerfile, six spike scripts, README with Cloud setup commands; local git repo initialised (no commits) | lint, typecheck, 3 unit tests, `next build`, standalone server returned health OK locally | Blocked on: gcloud CLI, Cloud project. Then Cloud setup, spikes, first Cloud Run deploy |
 | 2026-10-17 | Day 0 | Cloud setup verified (APIs, billing, Firestore asia-southeast1, vector index, bucket, corvus-run SA); first Cloud Run deploy; ADC configured; spikes: models, embeddings, tools, Firestore, TTS | Deployed revision corvus-00001-ht5 health OK; spike results in §4 | Video spike passed 2026-10-17 (Vertex accepts YouTube URLs). Redeploy with final model env vars |
 | 2026-10-17 | Day 1 | Tier 0 built: video analysis (MM:SS, balanced ≤10-min windows, retry), embeddings, Firestore store, seed of 4 videos + 2 articles + 8 searches (125 memories), hybrid search with per-source diversity, Ask agent (tools, forced final answer, citation check, inline-ID stripping, LOW thinking), signed workspace cookie, Ask/Watch/Read/Memory UI | 19 unit tests; local browser checks: cross-app answer cites article + 9:51 moment + search; Filipino Q answered in Filipino; viewer plays from 17:39; delete removes all 25 memories of a video from recall; restore works; warm latency 4–9 s | Deployed corvus-00003-sbm; fresh-visitor checks on the live URL passed (cross-app 7.1 s, Filipino 5.5 s, delete → honest "not found" with 0 leaks, restore, viewer at 9:51). Next: onboarding screen, Tier 1 (recap, threads, add by URL) |
+| 2026-10-18 | Day 2 | Revised Tier 1 built: time-aware Ask + `summarize_activity` (Manila week ranges, language rule); Takeout import (in-browser parsing by URL pattern, 90 days, batches, analysis queue, sample toggle, delete my data); Chrome extension (MV3, pairing code → token, YouTube 30 s watch + Google search/click capture, pause, popup, zip download); For you now (inferred focus with evidence + correction, Study/Commute/Rest, revisit-from-repeated-search, 21-item curated catalogue, reasons); audio recap (Gemini script with cited chapters, Gemini TTS, GCS, range-served WAV, demo recap 110 s). Agent: 12 s call timeout + retry, 429 backoff; focus: LOW thinking, retry, Firestore cache | 28 unit tests; local prod-build checks of import, pairing (single-use code, 401 without token), capture, analysis reuse, delete; live checks on corvus-00004-wmx: commute → recap first, focus inferred, audio 206 ranges, zip served | Extension not yet tested in a real Chrome; user Takeout import pending; Filipino article review |
 
 ---
 
 ## 13. Current handoff
 
-- Active: **Day 1 Tier 0 complete and deployed — Tier 1 next (audio recap, Memory Threads, Add by URL)**
+- Active: **Day 2 revised Tier 1 built and deployed — next: real-data test (Takeout + extension), eval script, freeze**
 - Build: scaffolded (Next.js 16.4, standalone output, Dockerfile); lint, typecheck, unit tests, production build and local `/api/health` pass
 - Deployed URL: https://corvus-378059077328.asia-southeast1.run.app (revision corvus-00003-sbm)
 - Next: Day 1. Decide topic, [L2], and 2–3 seed videos (≤ ~20 min, oEmbed 200); WORKSPACE_COOKIE_SECRET goes into Secret Manager when the workspace cookie lands.

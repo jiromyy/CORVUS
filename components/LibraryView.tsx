@@ -12,6 +12,7 @@ type Filter = "all" | SourceKind;
 export function LibraryView() {
   const [memories, setMemories] = useState<MemoryView[] | undefined>();
   const [hiddenCount, setHiddenCount] = useState(0);
+  const [includeSample, setIncludeSample] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
   const [showMoments, setShowMoments] = useState(false);
   const [query, setQuery] = useState("");
@@ -22,6 +23,7 @@ export function LibraryView() {
     const body = await res.json();
     setMemories(body.memories);
     setHiddenCount(body.hiddenCount);
+    setIncludeSample(body.includeSample);
   }
 
   useEffect(() => {
@@ -32,6 +34,7 @@ export function LibraryView() {
         if (cancelled) return;
         setMemories(body.memories);
         setHiddenCount(body.hiddenCount);
+        setIncludeSample(body.includeSample);
       });
     return () => {
       cancelled = true;
@@ -60,6 +63,25 @@ export function LibraryView() {
   async function reset() {
     setBusy("reset");
     await fetch("/api/workspace/reset", { method: "POST" });
+    await load();
+    setBusy(undefined);
+  }
+
+  async function toggleSample(value: boolean) {
+    setBusy("sample");
+    await fetch("/api/workspace", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ includeSample: value }),
+    });
+    await load();
+    setBusy(undefined);
+  }
+
+  async function deleteOwn() {
+    if (!window.confirm("Delete everything you imported or captured? Maya's sample data is not affected.")) return;
+    setBusy("delete-all");
+    await fetch("/api/workspace", { method: "DELETE" });
     await load();
     setBusy(undefined);
   }
@@ -97,6 +119,10 @@ export function LibraryView() {
 
       <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[var(--muted)]">
         <label className="flex items-center gap-2">
+          <input type="checkbox" checked={includeSample} disabled={busy === "sample"} onChange={(e) => toggleSample(e.target.checked)} />
+          Include Maya’s sample data
+        </label>
+        <label className="flex items-center gap-2">
           <input type="checkbox" checked={showMoments} onChange={(e) => setShowMoments(e.target.checked)} />
           Show individual video moments
         </label>
@@ -124,6 +150,12 @@ export function LibraryView() {
         ))}
       </ul>
       {!visible.length && <p className="mt-6 text-[var(--muted)]">No memories match.</p>}
+
+      <div className="mt-10 border-t border-[var(--border)] pt-4">
+        <button onClick={deleteOwn} disabled={busy === "delete-all"} className="text-sm text-red-500 hover:underline disabled:opacity-50">
+          {busy === "delete-all" ? "Deleting…" : "Delete my imported and captured data"}
+        </button>
+      </div>
     </div>
   );
 }

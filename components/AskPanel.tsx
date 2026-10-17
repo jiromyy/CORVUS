@@ -8,8 +8,14 @@ const SUGGESTIONS = [
   "Where did I see how to fix the TypeError when adding a number to input()?",
   "Saan ko napanood kung paano mag-install ng Python?",
   "Which video showed a tip calculator?",
-  "What have I searched about Python errors?",
+  "Give me a summary of my week",
 ];
+
+const TRACE_LABEL: Record<string, string> = {
+  search_memories: "Searched memories for",
+  summarize_activity: "Reviewed your activity",
+  get_memory: "Opened memory",
+};
 
 type State =
   | { status: "idle" }
@@ -115,8 +121,7 @@ function Answer({ result, onAsk }: { result: AskResult & { ms: number }; onAsk: 
             <ol className="mt-2 list-decimal space-y-1 pl-5">
               {result.trace.map((t, i) => (
                 <li key={i}>
-                  {t.tool === "search_memories" ? "Searched memories for" : "Opened memory"} “{t.input}” → {t.resultCount} result
-                  {t.resultCount === 1 ? "" : "s"}
+                  {TRACE_LABEL[t.tool] ?? t.tool} “{t.input}” → {t.resultCount} {t.tool === "summarize_activity" ? "activities" : t.resultCount === 1 ? "result" : "results"}
                 </li>
               ))}
               <li>Checked every citation against the memories it found</li>

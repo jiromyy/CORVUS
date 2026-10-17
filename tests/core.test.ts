@@ -100,3 +100,29 @@ describe("stripInlineIds", () => {
     );
   });
 });
+
+describe("dates", () => {
+  it("computes Manila weeks starting Monday", async () => {
+    const { namedRanges, dayRange, manilaDate } = await import("@/lib/dates");
+    // Sunday 2026-10-18 09:00 Manila = 01:00 UTC
+    const r = namedRanges(Date.parse("2026-10-18T01:00:00Z"));
+    expect(r.today).toBe("2026-10-18");
+    expect(r.weekdayName).toBe("Sunday");
+    expect(r.thisWeek).toEqual({ from: "2026-10-12", to: "2026-10-18" });
+    expect(r.lastWeek).toEqual({ from: "2026-10-05", to: "2026-10-11" });
+    // 23:30 UTC on the 17th is already the 18th in Manila
+    expect(manilaDate(Date.parse("2026-10-17T23:30:00Z"))).toBe("2026-10-18");
+    expect(dayRange("2026-10-12", "nope")).toEqual({ from: "2026-10-12T00:00:00+08:00", to: undefined });
+  });
+});
+
+describe("recap chapters", () => {
+  it("places chapter starts in proportion to text length", async () => {
+    const { chapterStarts, pcmToWav } = await import("@/lib/recap");
+    expect(chapterStarts([100, 300, 100], 50)).toEqual([0, 10, 40]);
+    const wav = pcmToWav(Buffer.alloc(48000), 24000);
+    expect(wav.subarray(0, 4).toString()).toBe("RIFF");
+    expect(wav.readUInt32LE(24)).toBe(24000);
+    expect(wav.length).toBe(48044);
+  });
+});

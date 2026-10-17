@@ -31,12 +31,24 @@ Next.js 16 (App Router, TypeScript, Tailwind) · Gemini on Google Cloud via `@go
 | `npm run dev`                                         | Dev server                                             |
 | `npm run build`                                       | Production build (standalone output for the container) |
 | `npm run lint` / `npm run typecheck` / `npm test` | Checks                                                 |
+| `npm run seed` | Seed Maya's demo memories (reuses cached video analyses; `-- --fresh` re-analyses) |
+| `npm run seed:catalog` | Write the curated suggestion catalogue with embeddings |
+| `npm run seed:recap` | Pre-generate Maya's audio recap (`-- fil` for Filipino) |
+| `npm run ext:zip` | Rebuild `public/corvus-capture.zip` from `extension/` (Windows PowerShell) |
 | `npm run spike:models`                                | List Gemini models visible to the project/location     |
 | `npm run spike:video -- "<youtube url>"`              | Gemini video → timestamped moments                    |
 | `npm run spike:embeddings`                            | Cross-language embedding similarity                    |
 | `npm run spike:tts`                                   | Gemini TTS → WAV files in `spikes/out/`             |
 | `npm run spike:tools`                                 | Agent loop: tool call → cited JSON answer             |
 | `npm run spike:firestore`                             | Workspace-filtered Firestore vector search             |
+
+## Chrome extension (automatic capture)
+
+`extension/` is a Manifest V3 extension that remembers YouTube videos watched for 30+ seconds and Google searches (and clicked results). It talks only to the Corvus server.
+
+1. `chrome://extensions` → Developer mode → **Load unpacked** → choose `extension/` (or unzip `/corvus-capture.zip` from the app).
+2. In Corvus → **Import** → **Get pairing code**; enter it in the extension popup (choose "Local development" when testing against localhost:3000).
+3. Pause/resume capture from the popup. Deleting your data in Corvus also disconnects the extension.
 
 ## Google Cloud setup (once per project)
 

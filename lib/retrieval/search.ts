@@ -13,6 +13,9 @@ export type SearchOptions = {
   query: string;
   limit?: number;
   sources?: SourceKind[];
+  /** Inclusive ISO instants. */
+  from?: string;
+  to?: string;
 };
 
 export type ScoredMemory = { memory: MemoryView; score: number; vector: number; keyword: number };
@@ -76,14 +79,20 @@ export function diversify(ranked: ScoredMemory[], limit: number, perContent = 2)
 }
 
 export async function searchMemories(opts: SearchOptions): Promise<{ results: ScoredMemory[]; mode: "hybrid" | "keyword" }> {
-  const { workspaceIds, hidden = new Set(), query, limit = 6, sources } = opts;
-  const allowed = (m: MemoryView) => !hidden.has(m.id) && (!sources?.length || sources.includes(m.source));
+  const { workspaceIds, hidden = new Set(), query, limit = 6, sources, from, to } = opts;
+  const dated = Boolean(from || to);
+  const allowed = (m: MemoryView) =>
+    !hidden.has(m.id) &&
+    (!sources?.length || sources.includes(m.source)) &&
+    (!from || Date.parse(m.occurredAt) >= Date.parse(from)) &&
+    (!to || Date.parse(m.occurredAt) <= Date.parse(to));
   const candidates = new Map<string, { memory: MemoryView; vector: number }>();
   let mode: "hybrid" | "keyword" = "hybrid";
 
   try {
     const vector = await embedQuery(query);
-    const hits = (await Promise.all(workspaceIds.map((ws) => vectorSearch(ws, vector, 20)))).flat();
+    // With a date filter, fetch more neighbours because some will fall outside the range.
+    const hits = (await Promise.all(workspaceIds.map((ws) => vectorSearch(ws, vector, dated ? 60 : 20)))).flat();
     for (const { memory, distance } of hits) {
       // Cosine distance → similarity.
       if (allowed(memory)) candidates.set(memory.id, { memory, vector: 1 - distance });
@@ -97,7 +106,7 @@ export async function searchMemories(opts: SearchOptions): Promise<{ results: Sc
   const all = await listMemories(workspaceIds);
   for (const memory of all) {
     if (!allowed(memory) || candidates.has(memory.id)) continue;
-    if (keywordScore(query, memory) >= 0.5) candidates.set(memory.id, { memory, vector: 0 });
+    if (keywordScore(query, memory) >= (dated ? 0.34 : 0.5)) candidates.set(memory.id, { memory, vector: 0 });
   }
 
   return { results: diversify(rerank(candidates, query), limit), mode };

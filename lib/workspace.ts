@@ -5,7 +5,7 @@
  */
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { ensureWorkspace } from "./db/store";
+import { ensureWorkspace, getWorkspaceState } from "./db/store";
 import { getEnv } from "./env";
 
 export const COOKIE_NAME = "corvus_ws";
@@ -51,4 +51,17 @@ export async function getWorkspace(): Promise<Workspace> {
     maxAge: MAX_AGE,
   });
   return { id, demoId, isNew: true };
+}
+
+/** The visitor's workspace plus the memory scope for queries: their own, and the sample unless hidden. */
+export async function getScope() {
+  const ws = await getWorkspace();
+  const state = await getWorkspaceState(ws.id);
+  return {
+    ws,
+    hidden: state.hidden,
+    includeSample: state.includeSample,
+    focusOverride: state.focusOverride,
+    workspaceIds: state.includeSample ? [ws.demoId, ws.id] : [ws.id],
+  };
 }
