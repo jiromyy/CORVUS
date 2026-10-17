@@ -1,0 +1,40 @@
+{
+  "name": "corvus",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "spike:models": "tsx --env-file-if-exists=.env.local spikes/0-list-models.ts",
+    "spike:video": "tsx --env-file-if-exists=.env.local spikes/1-video.ts",
+    "spike:embeddings": "tsx --env-file-if-exists=.env.local spikes/2-embeddings.ts",
+    "spike:tts": "tsx --env-file-if-exists=.env.local spikes/3-tts.ts",
+    "spike:tools": "tsx --env-file-if-exists=.env.local spikes/4-function-calling.ts",
+    "spike:firestore": "tsx --env-file-if-exists=.env.local spikes/5-firestore-vector.ts"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^8.4.0",
+    "@google/genai": "^2.30.0",
+    "firebase-admin": "^14.5.0",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
+  }
+}
