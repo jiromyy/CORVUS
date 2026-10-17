@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { parseTakeoutFile, prepareImport, type ParsedFile, type TakeoutRecord } from "@/lib/takeout";
 
-const BATCH = 200;
+const BATCH = 100;
 
 type VideoJob = { videoId: string; title: string; status: "queued" | "analysing" | "done" | "too_long" | "failed"; detail?: string };
 
@@ -42,37 +42,56 @@ export function ImportView() {
 
   async function upload(records: TakeoutRecord[]) {
     let done = 0;
+    let skipped = 0;
     setPhase({ step: "uploading", done, total: records.length });
     for (let i = 0; i < records.length; i += BATCH) {
-      const res = await fetch("/api/import/takeout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ records: records.slice(i, i + BATCH) }),
-      });
-      if (!res.ok) return setPhase({ step: "error", message: `Import stopped at ${done} of ${records.length} items. Try again.` });
+      const send = () =>
+        fetch("/api/import/takeout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ records: records.slice(i, i + BATCH) }),
+        }).catch(() => undefined);
+      // One retry: a batch can hit a brief embedding quota limit.
+      const res = (await send()) ?? undefined;
+      const ok = res?.ok ? res : await send();
+      if (!ok?.ok) {
+        const detail = await ok?.json().then((b) => b.error).catch(() => undefined);
+        return setPhase({
+          step: "error",
+          message: `Import stopped at ${done} of ${records.length} items${detail ? ` (${detail})` : ok ? ` (error ${ok.status})` : " (network error)"}. Items already imported are kept — you can try again.`,
+        });
+      }
+      const result = await ok.json().catch(() => ({}));
+      skipped += result.skipped ?? 0;
       done = Math.min(records.length, i + BATCH);
       setPhase({ step: "uploading", done, total: records.length });
     }
     const { queue } = await fetch("/api/import/queue?limit=10").then((r) => r.json());
     const jobs: VideoJob[] = queue.map((q: { videoId: string; title: string }) => ({ ...q, status: "queued" }));
-    setPhase({ step: "analysing", jobs, imported: records.length });
-    for (let i = 0; i < jobs.length; i++) {
-      jobs[i] = { ...jobs[i], status: "analysing" };
-      setPhase({ step: "analysing", jobs: [...jobs], imported: records.length });
-      try {
-        const r = await fetch(`/api/videos/${jobs[i].videoId}/analyse`, { method: "POST" }).then((x) => x.json());
-        jobs[i] =
-          r.status === "done"
-            ? { ...jobs[i], status: "done", detail: `${r.moments} moments${r.reused ? " (already analysed)" : ""}` }
-            : r.status === "too_long"
-              ? { ...jobs[i], status: "too_long", detail: `${Math.round(r.durationSeconds / 60)} min — too long to analyse` }
-              : { ...jobs[i], status: "failed", detail: "Analysis failed; the title is still searchable" };
-      } catch {
-        jobs[i] = { ...jobs[i], status: "failed", detail: "Analysis failed; the title is still searchable" };
+    setPhase({ step: "analysing", jobs, imported: records.length - skipped });
+    // Two videos at a time: about half the wait, without overloading the model quota.
+    let next = 0;
+    const worker = async () => {
+      while (next < jobs.length) {
+        const i = next++;
+        jobs[i] = { ...jobs[i], status: "analysing" };
+        setPhase({ step: "analysing", jobs: [...jobs], imported: records.length - skipped });
+        try {
+          const r = await fetch(`/api/videos/${jobs[i].videoId}/analyse`, { method: "POST" }).then((x) => x.json());
+          jobs[i] =
+            r.status === "done"
+              ? { ...jobs[i], status: "done", detail: `${r.moments} moments${r.reused ? " (already analysed)" : ""}` }
+              : r.status === "too_long"
+                ? { ...jobs[i], status: "too_long", detail: `${Math.round(r.durationSeconds / 60)} min — too long to analyse` }
+                : { ...jobs[i], status: "failed", detail: "Analysis failed; the title is still searchable" };
+        } catch {
+          jobs[i] = { ...jobs[i], status: "failed", detail: "Analysis failed; the title is still searchable" };
+        }
+        setPhase({ step: "analysing", jobs: [...jobs], imported: records.length - skipped });
       }
-      setPhase({ step: "analysing", jobs: [...jobs], imported: records.length });
-    }
-    setPhase({ step: "finished", jobs, imported: records.length });
+    };
+    await Promise.all([worker(), worker()]);
+    setPhase({ step: "finished", jobs, imported: records.length - skipped });
   }
 
   return (

@@ -79,3 +79,21 @@ describe("guessLanguage", () => {
     expect(guessLanguage("python list comprehension")).toBe("en");
   });
 });
+
+describe("sanitizeRecord", () => {
+  it("shortens long pasted queries instead of rejecting them", async () => {
+    const { sanitizeRecord } = await import("@/lib/takeout");
+    const traceback = `Traceback (most recent call last): File "main.py", line 3 ${"x".repeat(2000)} TypeError: can only concatenate str`;
+    const r = sanitizeRecord({ kind: "searched", time: "2026-10-16T10:00:00.000Z", title: traceback, query: traceback });
+    expect(r?.query?.length).toBe(300);
+    expect(r?.title.length).toBe(300);
+  });
+
+  it("keeps unicode titles and drops unusable links", async () => {
+    const { sanitizeRecord } = await import("@/lib/takeout");
+    const ok = sanitizeRecord({ kind: "watched", time: "2026-10-16T10:00:00.000Z", title: "Paano mag-code 🐍 | ñ", videoId: "Js05B8Z1ivE", url: "https://www.youtube.com/watch?v=Js05B8Z1ivE", channel: "Kuya Dev" });
+    expect(ok?.title).toBe("Paano mag-code 🐍 | ñ");
+    const longUrl = sanitizeRecord({ kind: "visited", time: "2026-10-16T10:00:00.000Z", title: "x", url: `https://example.com/?q=${"a".repeat(3000)}` });
+    expect(longUrl).toBeUndefined();
+  });
+});

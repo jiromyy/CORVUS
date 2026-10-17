@@ -17,6 +17,23 @@ export const TakeoutRecord = z.object({
 });
 export type TakeoutRecord = z.infer<typeof TakeoutRecord>;
 
+const clip = (s: string | undefined, max: number) => (s === undefined ? undefined : s.length > max ? `${s.slice(0, max - 1)}…` : s);
+
+/**
+ * Makes a record safe to send: long titles and queries (people paste whole error messages into
+ * Google) are shortened, and records with unusable links are dropped instead of failing a batch.
+ */
+export function sanitizeRecord(r: TakeoutRecord): TakeoutRecord | undefined {
+  const cleaned = {
+    ...r,
+    title: clip(r.title.trim(), 300) || "(untitled)",
+    query: clip(r.query?.trim(), 300),
+    channel: clip(r.channel?.trim(), 100),
+  };
+  const parsed = TakeoutRecord.safeParse(cleaned);
+  return parsed.success ? parsed.data : undefined;
+}
+
 type ActivityEntry = {
   header?: string;
   title?: string;
@@ -121,7 +138,9 @@ export function prepareImport(
   const since = now - days * 86_400_000;
   const seen = new Set<string>();
   const kept: TakeoutRecord[] = [];
-  for (const r of files.flatMap((f) => f.records)) {
+  for (const raw of files.flatMap((f) => f.records)) {
+    const r = sanitizeRecord(raw);
+    if (!r) continue;
     const t = Date.parse(r.time);
     if (t < since || t > now + 86_400_000) continue;
     if (r.kind === "visited" && !includeVisited) continue;
