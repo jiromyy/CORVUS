@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Corvus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 761 453" aria-hidden="true"><use href="#mark" /></svg>
+        <span>Corvus</span>
+      </div>
+      <div class="top-actions">
+        <button id="status-pill" class="pill" type="button" data-state="disconnected">
+          <span class="dot"></span><span id="status-text">Disconnected</span>
+        </button>
+        <div class="menu-wrap">
+          <button id="menu-btn" class="icon-btn" type="button" aria-label="More" aria-haspopup="menu" aria-expanded="false">
+            <svg class="i"><use href="#i-more" /></svg>
+          </button>
+          <div id="menu" class="menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-action="open"><svg class="i"><use href="#i-external" /></svg>Open Corvus</button>
+            <button type="button" role="menuitem" data-action="new" data-needs="connected"><svg class="i"><use href="#i-plus" /></svg>New conversation</button>
+            <button type="button" role="menuitem" data-action="pause" data-needs="connected"><svg class="i"><use href="#i-pause" /></svg><span>Pause capture</span></button>
+            <button type="button" role="menuitem" data-action="forget" data-needs="remembered-site"><svg class="i"><use href="#i-forget" /></svg><span>Stop remembering this site</span></button>
+            <hr />
+            <button type="button" role="menuitem" data-action="disconnect" data-needs="connected" class="danger"><svg class="i"><use href="#i-unplug" /></svg>Disconnect</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Corvus">
+      <button type="button" role="tab" id="tab-ask" aria-controls="view-ask" aria-selected="true">Ask</button>
+      <button type="button" role="tab" id="tab-activity" aria-controls="view-activity" aria-selected="false">Activity</button>
+    </nav>
+
+    <!-- Not connected: pair with a code from Corvus. -->
+    <section id="view-connect" class="view connect" hidden>
+      <div class="connect-card">
+        <div class="mark-tile" data-state="disconnected"><svg viewBox="0 0 761 453" aria-hidden="true"><use href="#mark" /><use class="eye" href="#mark-eye" /></svg></div>
+        <h1 class="serif">Connect to Corvus.</h1>
+        <p class="muted">Open Corvus → <b>Browser extension</b> → <b>Connect</b>, then enter the code shown there.</p>
+        <form id="pair-form">
+          <input id="code" type="text" placeholder="ABCD-2345" autocomplete="off" spellcheck="false" aria-label="Pairing code" />
+          <select id="server" aria-label="Server">
+            <option value="production">Corvus (live)</option>
+            <option value="local">Local development (localhost:3000)</option>
+          </select>
+          <button type="submit" class="btn primary">Connect</button>
+          <p id="pair-error" class="error" role="alert"></p>
+        </form>
+        <button type="button" class="text-link" data-action="open">Open Corvus</button>
+      </div>
+    </section>
+
+    <section id="view-ask" class="view ask" role="tabpanel" aria-labelledby="tab-ask">
+      <div id="ask-scroll" class="ask-scroll">
+        <div id="context"></div>
+        <div id="remember"></div>
+        <div id="empty" class="empty">
+          <div id="empty-mark" class="mark-tile" data-state="unremembered"><svg viewBox="0 0 761 453" aria-hidden="true"><use href="#mark" /><use class="eye" href="#mark-eye" /></svg></div>
+          <h1 id="empty-title" class="serif">Ask beside what you watch.</h1>
+          <p class="muted">Recall related ideas, understand this source, or remember it for later.</p>
+          <div id="suggestions" class="suggestions"></div>
+        </div>
+        <div id="thread" class="thread" aria-live="polite"></div>
+      </div>
+      <form id="composer" class="composer">
+        <div class="composer-box">
+          <textarea id="question" rows="1" maxlength="500" placeholder="Ask Corvus…" aria-label="Ask Corvus"></textarea>
+          <button id="send" type="submit" class="send" aria-label="Ask" disabled><svg class="i"><use href="#i-arrow-up" /></svg></button>
+        </div>
+        <p class="privacy"><svg class="i"><use href="#i-shield" /></svg><span id="privacy-text">Only selected context is shared</span></p>
+      </form>
+    </section>
+
+    <section id="view-activity" class="view activity" role="tabpanel" aria-labelledby="tab-activity" hidden>
+      <div class="capture-card">
+        <div class="tile" id="capture-tile"><svg class="i"><use href="#i-radio" /></svg></div>
+        <div class="grow">
+          <div class="strong" id="capture-title">Capture is active</div>
+          <div class="muted small" id="capture-sub">YouTube + Search</div>
+        </div>
+        <label class="switch"><input id="enabled" type="checkbox" role="switch" aria-label="Capture" /><span></span></label>
+      </div>
+
+      <h2 class="section-title">Recent activity</h2>
+      <ul id="recent" class="recent"></ul>
+      <p id="recent-empty" class="muted small recent-empty">Watch a YouTube video for 30 seconds, search on Google, or remember a page — it will appear here.</p>
+      <div id="queue" class="queue" data-state="ok"></div>
+
+      <h2 class="section-title">Remembered sites</h2>
+      <ul id="sites" class="sites"></ul>
+      <p id="sites-empty" class="muted small">No websites yet. Use <b>Always remember</b> on a page you want Corvus to keep.</p>
+
+      <p class="legal muted small">Hackathon prototype. Corvus is not a Google product.</p>
+    </section>
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <path id="mark" fill="currentColor" fill-rule="evenodd" transform="translate(-9 -1794)" d="M486.279 1940.47C477.053 1939.73 467.531 1940.79 458.195 1943.88 420.85 1956.26 400.62 1996.53 413.011 2033.82 425.402 2071.12 465.721 2091.33 503.066 2078.95 540.412 2066.58 560.641 2026.31 548.25 1989.01 538.957 1961.03 513.954 1942.68 486.279 1940.47ZM24.6896 1794 407.248 1794C516.84 1794 608.277 1871.64 629.424 1974.85L633.114 2011.42 652.061 2011.42C717.197 2011.42 770 2064.15 770 2129.21L770 2224.12C770 2236.76 759.745 2247 747.094 2247L407.248 2247C281.999 2247 180.464 2145.59 180.464 2020.5L180.464 2000.97 146.403 2000.97C117.791 2000.97 94.5954 1977.81 94.5954 1949.23L94.5954 1897.49 60.808 1897.49C32.1951 1897.49 8.99993 1874.32 8.99993 1845.74L8.99993 1809.67C8.99993 1801.02 16.0243 1794 24.6896 1794Z" />
+        <path id="mark-eye" transform="translate(-9 -1794)" d="M486.279 1940.47C477.053 1939.73 467.531 1940.79 458.195 1943.88 420.85 1956.26 400.62 1996.53 413.011 2033.82 425.402 2071.12 465.721 2091.33 503.066 2078.95 540.412 2066.58 560.641 2026.31 548.25 1989.01 538.957 1961.03 513.954 1942.68 486.279 1940.47Z" />
+        <!-- Icons: Lucide (ISC). -->
+        <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="19" cy="12" r="1.4" /></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></symbol>
+        <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5" /></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" /></symbol>
+        <symbol id="i-video" viewBox="0 0 24 24"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" /><rect x="2" y="6" width="14" height="12" rx="2" /></symbol>
+        <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></symbol>
+        <symbol id="i-page" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8" /></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+        <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></symbol>
+        <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></symbol>
+        <symbol id="i-radio" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" /><circle cx="12" cy="12" r="2" /><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19" /></symbol>
+        <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" /></symbol>
+        <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1" /><rect x="6" y="4" width="4" height="16" rx="1" /></symbol>
+        <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" /></symbol>
+        <symbol id="i-forget" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></symbol>
+        <symbol id="i-unplug" viewBox="0 0 24 24"><path d="m19 5 3-3M2 22l3-3M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4ZM7.5 13.5 10 11M10.5 16.5 13 14M12 6l6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z" /></symbol>
+        <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /></symbol>
+        <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></symbol>
+      </defs>
+    </svg>
+    <script src="panel.js" type="module"></script>
+  </body>
+</html>

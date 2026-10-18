@@ -7,8 +7,15 @@ let playedSeconds = 0;
 let sentId = null;
 let lastQuery = null;
 
+// After the extension reloads, this old copy of the script can no longer reach it; ignore that.
+function message(m) {
+  try {
+    chrome.runtime.sendMessage(m).catch(() => undefined);
+  } catch {}
+}
+
 function send(record) {
-  chrome.runtime.sendMessage({ type: "capture", record: { ...record, time: new Date().toISOString() } });
+  message({ type: "capture", record: { ...record, time: new Date().toISOString() } });
 }
 
 function videoTitle() {
@@ -40,11 +47,13 @@ function tick() {
     currentId = id;
     playedSeconds = 0;
   }
-  if (sentId === id) return;
 
   const video = document.querySelector("video");
   const adShowing = document.querySelector(".ad-showing, .ad-interrupting");
-  if (video && !video.paused && !adShowing) playedSeconds += TICK_MS / 1000;
+  const playing = Boolean(video && !video.paused && !adShowing);
+  if (playing) message({ type: "playing" }); // the toolbar bird glows while Corvus is watching along
+  if (sentId === id) return;
+  if (playing) playedSeconds += TICK_MS / 1000;
 
   if (playedSeconds >= WATCH_THRESHOLD_S) {
     const title = videoTitle();
@@ -55,3 +64,23 @@ function tick() {
 }
 
 setInterval(tick, TICK_MS);
+
+// The side panel asks what's playing (to use it as context) and can jump to a cited moment.
+chrome.runtime.onMessage.addListener((m, _sender, sendResponse) => {
+  const id = new URL(location.href).searchParams.get("v");
+  const video = document.querySelector("video");
+  if (m.type === "context") {
+    if (location.pathname !== "/watch" || !id) return sendResponse(null);
+    sendResponse({
+      videoId: id,
+      title: videoTitle(),
+      channel: channelName(),
+      currentTime: video && !document.querySelector(".ad-showing") ? video.currentTime : undefined,
+      paused: video ? video.paused : true,
+    });
+  } else if (m.type === "seek" && video && m.videoId === id) {
+    video.currentTime = m.seconds;
+    video.play().catch(() => undefined);
+    sendResponse({ ok: true });
+  }
+});

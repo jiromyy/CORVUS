@@ -3,6 +3,7 @@
  * (10 minutes); the extension exchanges it for a long random token. Only token hashes are stored.
  */
 import { createHash, randomBytes, randomInt } from "node:crypto";
+import { getWorkspaceState } from "./db/store";
 import { getDb } from "./db/firestore";
 import { getScope } from "./workspace";
 
@@ -64,6 +65,18 @@ export async function workspaceFromRequest(request: Request): Promise<string | u
   const token = bearer(request);
   if (token) return workspaceForToken(token);
   return (await getScope()).ws.id;
+}
+
+/**
+ * The memory scope for a request: the extension token's workspace (its own memories only, never the
+ * sample), otherwise the browser cookie's scope. Undefined when a token was sent but isn't valid.
+ */
+export async function scopeFromRequest(request: Request) {
+  if (!bearer(request)) return getScope();
+  const id = await workspaceForToken(bearer(request));
+  if (!id) return undefined;
+  const state = await getWorkspaceState(id);
+  return { ws: { id }, signedIn: Boolean(state.ownerUid), hidden: state.hidden, workspaceIds: [id] };
 }
 
 export type ExtensionStatus = { paired: number; lastSeenAt: string | null; connected: boolean };

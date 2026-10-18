@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Corvus Capture",
-  "version": "0.2.0",
-  "description": "Remembers the YouTube videos you watch, the Google searches you make, and pages on websites you approve, in your private Corvus memory. Hackathon prototype; not a Google product.",
-  "permissions": ["storage", "tabs"],
+  "version": "0.3.0",
+  "description": "Ask Corvus beside what you watch and read, and remember YouTube videos, Google searches, and pages on websites you approve. Hackathon prototype; not a Google product.",
+  "permissions": ["storage", "tabs", "sidePanel", "favicon"],
   "host_permissions": [
     "https://corvus-378059077328.asia-southeast1.run.app/*",
     "http://localhost:3000/*"
   ],
-  "background": { "service_worker": "background.js" },
+  "background": { "service_worker": "background.js", "type": "module" },
   "content_scripts": [
     { "matches": ["https://www.youtube.com/*"], "js": ["youtube.js"], "run_at": "document_idle" },
     {
@@ -17,5 +17,15 @@
       "run_at": "document_idle"
     }
   ],
-  "action": { "default_popup": "popup.html", "default_title": "Corvus Capture" }
+  "side_panel": { "default_path": "panel.html" },
+  "icons": {
+    "16": "icons/active-16.png",
+    "32": "icons/active-32.png",
+    "48": "icons/active-48.png",
+    "128": "icons/active-128.png"
+  },
+  "action": {
+    "default_title": "Corvus",
+    "default_icon": { "16": "icons/unremembered-16.png", "32": "icons/unremembered-32.png" }
+  }
 }
