@@ -50,3 +50,9 @@ export async function workspaceFromRequest(request: Request): Promise<string | u
   if (token) return workspaceForToken(token);
   return (await getScope()).ws.id;
 }
+
+/** How many browsers are paired to a workspace (tokens are only ever stored hashed). */
+export async function pairedBrowsers(workspaceId: string) {
+  const snap = await getDb().collection(TOKENS).where("workspaceId", "==", workspaceId).count().get();
+  return snap.data().count;
+}

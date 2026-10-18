@@ -1,6 +1,6 @@
 "use client";
 
-import { Brain, Import, Laptop, Menu, MessageSquare, Moon, Plus, Podcast, Sun, X, type LucideIcon } from "lucide-react";
+import { Activity, Brain, Compass, Database, Laptop, Menu, MessageSquare, Moon, Plus, Podcast, Settings, Sun, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -8,19 +8,26 @@ import { Wordmark } from "../Brand";
 import { Account } from "./Account";
 import { EvidenceProvider } from "../Evidence";
 import { NEW_CONVERSATION_EVENT } from "./events";
+import { THEME_EVENT, applyTheme, currentTheme, setTheme, type ThemePreference } from "./theme";
 
 const NAV: Array<{ href: string; label: string; icon: LucideIcon }> = [
   { href: "/", label: "Ask Corvus", icon: MessageSquare },
   { href: "/library", label: "Memory", icon: Brain },
   { href: "/recap", label: "Recap", icon: Podcast },
-  { href: "/import", label: "Import & capture", icon: Import },
+  { href: "/for-you", label: "For you", icon: Compass },
+  { href: "/insights", label: "Insights", icon: Activity },
+  { href: "/sources", label: "Sources", icon: Database },
 ];
 
 const TITLES: Record<string, string> = {
   "/": "Ask Corvus",
   "/library": "Memory",
   "/recap": "Recap",
+  "/for-you": "For you",
+  "/insights": "Insights",
+  "/sources": "Sources",
   "/import": "Import & capture",
+  "/settings": "Settings",
   "/watch": "Video moment",
   "/read": "Article",
 };
@@ -89,12 +96,16 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
           <Plus size={17} /> New conversation
         </button>
         <nav className="nav-list" aria-label="Main">
-          {NAV.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} onClick={onClose} className={`nav-item ${pathname === href ? "active" : ""}`} aria-current={pathname === href ? "page" : undefined}>
-              <Icon size={18} />
-              <span>{label}</span>
-            </Link>
-          ))}
+          {NAV.map(({ href, label, icon: Icon }) => {
+            // Import lives under Sources.
+            const active = pathname === href || (href === "/sources" && pathname === "/import");
+            return (
+              <Link key={href} href={href} onClick={onClose} className={`nav-item ${active ? "active" : ""}`} aria-current={active ? "page" : undefined}>
+                <Icon size={18} />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
         </nav>
         <div className="sidebar-spacer" />
         <Link href="/import#extension" className="capture-card" onClick={onClose}>
@@ -105,6 +116,10 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
           </div>
           <Laptop size={16} className="faint" />
         </Link>
+        <Link href="/settings" onClick={onClose} className={`nav-item ${pathname === "/settings" ? "active" : ""}`} aria-current={pathname === "/settings" ? "page" : undefined}>
+          <Settings size={18} />
+          <span>Settings</span>
+        </Link>
         <Account />
         <p className="sidebar-note">Corvus is a hackathon concept and is not a Google product.</p>
       </aside>
@@ -112,23 +127,19 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
   );
 }
 
-type ThemePreference = "light" | "dark" | "system";
 const NEXT_THEME: Record<ThemePreference, ThemePreference> = { dark: "light", light: "system", system: "dark" };
 
-function applyTheme(pref: ThemePreference) {
-  const dark = pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.dataset.theme = dark ? "dark" : "light";
-  document.documentElement.dataset.themePreference = pref;
-}
-
-/** Cycles dark → light → system; the choice is remembered in this browser. */
+/** Cycles dark → light → system; stays in sync with the choice in Settings. */
 function ThemeToggle() {
   const [pref, setPref] = useState<ThemePreference>("system");
 
   useEffect(() => {
     // The pre-paint script already applied the saved preference; mirror it in the button.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only value, read after mount
-    setPref((document.documentElement.dataset.themePreference as ThemePreference) ?? "system");
+    setPref(currentTheme());
+    const onTheme = (e: Event) => setPref((e as CustomEvent<ThemePreference>).detail);
+    window.addEventListener(THEME_EVENT, onTheme);
+    return () => window.removeEventListener(THEME_EVENT, onTheme);
   }, []);
 
   useEffect(() => {
@@ -139,20 +150,9 @@ function ThemeToggle() {
     return () => media.removeEventListener("change", onChange);
   }, [pref]);
 
-  function cycle() {
-    const next = NEXT_THEME[pref];
-    setPref(next);
-    applyTheme(next);
-    try {
-      localStorage.setItem("corvus-theme", next);
-    } catch {
-      // Not remembered; harmless.
-    }
-  }
-
   const Icon = pref === "dark" ? Moon : pref === "light" ? Sun : Laptop;
   return (
-    <button className="icon-button" onClick={cycle} aria-label={`Theme: ${pref}. Switch theme`} title={`Theme: ${pref}`}>
+    <button className="icon-button" onClick={() => setTheme(NEXT_THEME[pref])} aria-label={`Theme: ${pref}. Switch theme`} title={`Theme: ${pref}`}>
       <Icon size={18} />
     </button>
   );

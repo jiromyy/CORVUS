@@ -78,6 +78,16 @@ export function AskPanel() {
     }
   }
 
+  // A question passed in the link (e.g. "Ask about this" on Insights) is asked straight away.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("ask");
+    if (!q) return;
+    window.history.replaceState(null, "", "/");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the question only exists in the browser URL
+    void ask(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, []);
+
   const composer = (variant: "hero" | "follow-up") => (
     <Composer
       variant={variant}
