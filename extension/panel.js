@@ -308,7 +308,7 @@ function renderActivity() {
   document.querySelector(".capture-card").dataset.state = paused ? "paused" : "on";
   $("capture-title").textContent = !s.enabled ? "Capture is paused" : remote?.paused ? "Paused in Corvus" : "Capture is active";
   const sources = [remote?.youtube !== false && "YouTube", remote?.search !== false && "Search", remote?.domains?.length && `${remote.domains.length} site${remote.domains.length === 1 ? "" : "s"}`].filter(Boolean);
-  $("capture-sub").textContent = !s.enabled ? "Nothing new is remembered until you turn it back on" : remote?.paused ? "Resume it in Corvus → Settings" : sources.join(" + ") || "Every source is off in Corvus settings";
+  $("capture-sub").textContent = !s.enabled ? "Nothing new is remembered until you turn it back on" : remote?.paused ? "Resume it here or in Corvus" : sources.join(" + ") || "Every source is off in Corvus settings";
 
   const recent = s.recent ?? [];
   $("recent-empty").hidden = recent.length > 0;
@@ -529,7 +529,7 @@ $("question").addEventListener("keydown", (e) => {
 $("tab-ask").addEventListener("click", () => { state.view = "ask"; render(); });
 $("tab-activity").addEventListener("click", () => { state.view = "activity"; render(); });
 $("status-pill").addEventListener("click", () => { state.view = "activity"; render(); });
-$("enabled").addEventListener("change", (e) => chrome.storage.local.set({ enabled: e.target.checked }));
+$("enabled").addEventListener("change", (e) => chrome.runtime.sendMessage({ type: "set-paused", paused: !e.target.checked }));
 
 $("menu-btn").addEventListener("click", (e) => {
   e.stopPropagation();
@@ -547,7 +547,7 @@ document.addEventListener("click", async (e) => {
   setMenu(false);
   if (action === "open") chrome.tabs.create({ url: state.s.base });
   if (action === "new") { state.conversation = []; render(); renderThread(); }
-  if (action === "pause") chrome.storage.local.set({ enabled: !state.s.enabled });
+  if (action === "pause") chrome.runtime.sendMessage({ type: "set-paused", paused: state.s.enabled });
   if (action === "forget" && context()?.domain) forgetSite(context().domain);
   if (action === "disconnect") chrome.runtime.sendMessage({ type: "disconnect" });
 });
@@ -583,3 +583,5 @@ await loadStorage();
 $("server").value = state.s.server;
 await refreshTab();
 if (connected()) chrome.runtime.sendMessage({ type: "refresh" });
+// Keep the pause state in step with Corvus while the panel is open.
+setInterval(() => document.visibilityState === "visible" && connected() && chrome.runtime.sendMessage({ type: "refresh" }), 30_000);

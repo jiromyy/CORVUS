@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Corvus Capture",
-  "version": "0.3.0",
-  "description": "Ask Corvus beside what you watch and read, and remember YouTube videos, Google searches, and pages on websites you approve. Hackathon prototype; not a Google product.",
+  "version": "0.3.1",
+  "description": "Ask Corvus beside what you watch and read, and remember YouTube videos, Google searches, and pages on websites you approve.",
   "permissions": ["storage", "tabs", "sidePanel", "favicon"],
   "host_permissions": [
     "https://corvus-378059077328.asia-southeast1.run.app/*",

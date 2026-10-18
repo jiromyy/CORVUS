@@ -3,7 +3,7 @@
 import { SERVERS, STATE_LABEL, normalizeDomain, pageKind, settings, siteState, domainRemembered } from "./shared.js";
 
 const DEDUPE_MS = 10 * 60_000;
-const SETTINGS_TTL_MS = 2 * 60_000;
+const SETTINGS_TTL_MS = 30_000;
 const recentlySent = new Map(); // key -> timestamp
 
 chrome.sidePanel?.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => undefined);
@@ -15,7 +15,8 @@ async function remember(entry) {
   await chrome.storage.local.set({ recent: next });
 }
 
-// Capture settings chosen in Corvus (pause, per-source switches, remembered websites), cached for 2 minutes.
+// Capture settings chosen in Corvus (pause, per-source switches, remembered websites), cached for 30 seconds.
+// Corvus's pause is the single source of truth: the extension's on/off switch always mirrors it.
 // The result also says whether Corvus is reachable, which the icon and panel show.
 let fetchedAt = 0;
 async function captureSettings(s, { force = false } = {}) {
@@ -30,7 +31,7 @@ async function captureSettings(s, { force = false } = {}) {
     }
     if (!res.ok) throw new Error(String(res.status));
     const remote = await res.json();
-    await chrome.storage.local.set({ remote, link: "ok" });
+    await chrome.storage.local.set({ remote, link: "ok", enabled: !remote.paused });
     return remote;
   } catch {
     await chrome.storage.local.set({ link: "unreachable" });
@@ -47,8 +48,17 @@ async function putSettings(s, patch) {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) return { error: body.error ?? "Corvus couldn’t save that." };
   fetchedAt = Date.now();
-  await chrome.storage.local.set({ remote: body, link: "ok" });
+  await chrome.storage.local.set({ remote: body, link: "ok", enabled: !body.paused });
   return { ok: true, remote: body };
+}
+
+/** Pause or resume from the extension: saved in Corvus so the web app shows the same state. */
+async function setPaused(paused) {
+  const s = await settings();
+  // Stop or start locally at once; if Corvus can't be reached the local switch still applies.
+  await chrome.storage.local.set({ enabled: !paused });
+  if (!s.token) return { ok: true };
+  return putSettings(s, { paused }).catch(() => ({ ok: true, offline: true }));
 }
 
 // ---- Toolbar icon -------------------------------------------------------------------------------
@@ -219,6 +229,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     : message.type === "remember" ? capture(message.record, { tabId, manual: true })
     : message.type === "remember-site" ? rememberSite(message.record, tabId)
     : message.type === "forget-site" ? settings().then((s) => putSettings(s, { removeDomain: message.domain })).catch(() => ({ error: "Couldn’t reach Corvus." }))
+    : message.type === "set-paused" ? setPaused(Boolean(message.paused))
     : message.type === "refresh" ? settings().then((s) => captureSettings(s, { force: true })).then(() => ({ ok: true }))
     : message.type === "connect" ? connect(message.code, message.server)
     : message.type === "disconnect" ? chrome.storage.local.set({ token: null, recent: [], remote: null, link: "none" }).then(() => ({ ok: true }))

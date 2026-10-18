@@ -162,7 +162,6 @@ export function Sidebar({ pathname, open, onClose }: { pathname: string; open: b
           {shown.filter((i) => i.bottom).map(link)}
           <div ref={account}>
             <Account />
-            <p className="sidebar-note">Corvus is a hackathon concept and is not a Google product.</p>
           </div>
         </div>
       </aside>

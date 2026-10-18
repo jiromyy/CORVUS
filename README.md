@@ -2,8 +2,6 @@
 
 A private, source-grounded memory for what you watch, search, and read. Built for the Google Cloud AI Builder Cup (Media, Content & Digital Experiences).
 
-> Corvus is a hackathon concept and is not a Google product.
-
 ## Stack
 
 Next.js 16 (App Router, TypeScript, Tailwind) · Gemini on Google Cloud via `@google/genai` · Cloud Firestore (vector search) · Cloud Storage · Cloud Run.

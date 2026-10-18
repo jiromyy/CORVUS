@@ -13,13 +13,25 @@ export function useCaptureSettings() {
   const [settings, setSettings] = useState<CaptureSettings | undefined>();
 
   useEffect(() => {
-    fetch("/api/capture/settings")
-      .then((r) => (r.ok ? r.json() : undefined))
-      .catch(() => undefined)
-      .then((s) => s && setSettings(s));
+    const load = () =>
+      fetch("/api/capture/settings")
+        .then((r) => (r.ok ? r.json() : undefined))
+        .catch(() => undefined)
+        .then((s) => s && setSettings(s));
+    load();
+    // The extension can pause or resume too: re-read every 30 s and when the user comes back to the tab.
+    const id = window.setInterval(() => document.visibilityState === "visible" && load(), 30_000);
+    const onFocus = () => document.visibilityState === "visible" && load();
     const onChange = (e: Event) => setSettings((e as CustomEvent<CaptureSettings>).detail);
     window.addEventListener(CAPTURE_EVENT, onChange);
-    return () => window.removeEventListener(CAPTURE_EVENT, onChange);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener(CAPTURE_EVENT, onChange);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, []);
 
   async function update(patch: Partial<CaptureSettings>) {

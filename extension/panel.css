@@ -339,7 +339,6 @@ use[href="#i-more"] { fill: currentColor; }
 .sites .site-chip { font-size: 11px; }
 .sites button { border: 0; background: none; color: var(--text-3); font-size: 11px; padding: 4px 6px; border-radius: 6px; }
 .sites button:hover { color: var(--danger); background: var(--danger-wash); }
-.legal { margin-top: 26px; text-align: center; }
 
 /* Connect */
 .connect { overflow-y: auto; padding: 28px 16px; display: flex; }
