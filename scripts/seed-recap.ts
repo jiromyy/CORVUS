@@ -1,5 +1,5 @@
 /**
- * Pre-generates Maya's demo recap so the live demo plays instantly.
+ * Pre-generates Raven's demo recap so the live demo plays instantly.
  *   npm run seed:recap            (English)
  *   npm run seed:recap -- fil     (Filipino)
  */

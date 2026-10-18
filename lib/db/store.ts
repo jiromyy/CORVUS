@@ -121,11 +121,11 @@ export async function deactivateMemory(id: string) {
 
 // ---------- workspaces ----------
 
-type WorkspaceDoc = { createdAt: string; hiddenMemoryIds?: string[]; includeSample?: boolean; focusOverride?: string | null };
+type WorkspaceDoc = { createdAt: string; hiddenMemoryIds?: string[]; includeSample?: boolean; focusOverride?: string | null; ownerUid?: string };
 
 export type WorkspaceState = { hidden: Set<string>; includeSample: boolean; focusOverride?: string };
 
-/** Hidden demo memories and whether Maya's sample data is shown alongside the visitor's own. */
+/** Hidden demo memories and whether Raven's sample data is shown alongside the visitor's own. */
 export async function getWorkspaceState(workspaceId: string): Promise<WorkspaceState> {
   const doc = (await getDb().collection(WORKSPACES).doc(workspaceId).get()).data() as WorkspaceDoc | undefined;
   return {
@@ -156,7 +156,46 @@ export async function deleteWorkspaceData(workspaceId: string) {
       await batch.commit();
     }
   }
-  await db.collection(WORKSPACES).doc(workspaceId).set({ createdAt: new Date().toISOString(), hiddenMemoryIds: [], includeSample: true });
+  // Merge so a signed-in owner stays linked to the (now empty) workspace.
+  await db
+    .collection(WORKSPACES)
+    .doc(workspaceId)
+    .set({ createdAt: new Date().toISOString(), hiddenMemoryIds: [], includeSample: true, focusOverride: null }, { merge: true });
+}
+
+// ---------- accounts ----------
+
+const USERS = "users";
+
+export type UserProfile = { uid: string; name?: string; email?: string; photoURL?: string };
+type UserDoc = Omit<UserProfile, "uid"> & { workspaceId: string; createdAt: string; lastSignInAt: string };
+
+/** The workspace a Google account is linked to, if it has signed in before. */
+export async function getUserWorkspace(uid: string): Promise<string | undefined> {
+  const snap = await getDb().collection(USERS).doc(uid).get();
+  return (snap.data() as UserDoc | undefined)?.workspaceId;
+}
+
+export async function getWorkspaceOwner(workspaceId: string): Promise<string | undefined> {
+  const snap = await getDb().collection(WORKSPACES).doc(workspaceId).get();
+  return (snap.data() as WorkspaceDoc | undefined)?.ownerUid;
+}
+
+/** Links an account to a workspace (both directions) and refreshes the stored profile. */
+export async function linkUserWorkspace(profile: UserProfile, workspaceId: string) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const { uid, ...rest } = profile;
+  const user = db.collection(USERS).doc(uid);
+  const existing = await user.get();
+  await user.set({ ...rest, workspaceId, lastSignInAt: now, ...(existing.exists ? {} : { createdAt: now }) }, { merge: true });
+  await db.collection(WORKSPACES).doc(workspaceId).set({ ownerUid: uid }, { merge: true });
+}
+
+export async function getUserProfile(uid: string): Promise<UserProfile | undefined> {
+  const snap = await getDb().collection(USERS).doc(uid).get();
+  const data = snap.data() as UserDoc | undefined;
+  return data && { uid, name: data.name, email: data.email, photoURL: data.photoURL };
 }
 
 export async function ensureWorkspace(id: string) {

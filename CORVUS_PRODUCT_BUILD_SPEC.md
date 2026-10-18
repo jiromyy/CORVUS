@@ -75,7 +75,7 @@ Judges will ask how Corvus differs from Google's own personal-history features (
 
 ## 5. Persona
 
-**Maya, university student in the Philippines learning Python.** Watches tutorial videos in English and Filipino, searches unfamiliar terms (sometimes in her first language), reads explainers, commutes by train. She remembers explanations but not where they came from, and does not notice which concepts she keeps getting stuck on.
+**Raven, university student in the Philippines learning Python** (named for the raven, Corvus’s namesake genus). Watches tutorial videos in English and Filipino, searches unfamiliar terms (sometimes in their first language), reads explainers, commutes by train. Raven remembers explanations but not where they came from, and does not notice which concepts they keep getting stuck on.
 
 Demo language pairing: English plus **Filipino** (decided 2026-10-17). Examples below say "[L2]" for Filipino.
 
@@ -165,7 +165,7 @@ All three paths emit the same `ActivityEvent` shape (§13), distinguished by `so
 
 - A fixed workspace `demo-maya` that every visitor sees by default, read-only for structure but deletions allowed (reset restores it).
 - Uses **real, public, embeddable educational YouTube videos** (prefer Creative Commons licence) and short **original articles written by the team** (avoid copying third-party text).
-- Activity history (watch times, searches, rewatches) is fabricated for Maya and labelled "Sample history".
+- Activity history (watch times, searches, rewatches) is fabricated for Raven and labelled "Sample history".
 - All Gemini processing (video moments, embeddings, threads, one pre-generated recap) runs **once, offline, via a seed script**, and results are stored in Firestore. The live demo never waits on video analysis.
 
 ### 9.2 Add by URL (`sourceMode: "user_capture"`)
@@ -192,7 +192,7 @@ Shown on onboarding and in Controls:
 
 ## 10. Hero demo (≤ 3:00 total video; live run ≈ 2:30)
 
-Seed state (live since 2026-10-17): Maya's workspace with 4 Python videos (one in Filipino), 8 searches (the `TypeError` search three times), an English article on `input()`/`TypeError` and a Filipino article on lists and loops — 125 memories. Questions below were checked against the real seeded moments.
+Seed state (live since 2026-10-17): Raven's workspace (internal ID `demo-maya`, kept from the persona's earlier name) with 4 Python videos (one in Filipino), 8 searches (the `TypeError` search three times), an English article on `input()`/`TypeError` and a Filipino article on lists and loops — 125 memories. Questions below were checked against the real seeded moments.
 
 1. **(0:00–0:20) Problem.** "We remember the idea, not the source."
 2. **(0:20–0:50) Recall across apps.** Ask: "Where did I see how to fix the TypeError when adding a number to input()?" Corvus cites the article passage, the Tech With Tim moment at **9:51**, and the repeated Google search. Click "Open at 9:51" → the real video plays from that second.
@@ -483,7 +483,7 @@ All mutations validate input with Zod and derive the workspace from the cookie.
 
 ### Screens
 
-1. **Onboarding** (one screen): what Corvus is, honesty label, two buttons — "Explore Maya's demo" and "Start my own memory".
+1. **Onboarding** (one screen): what Corvus is, honesty label, two buttons — "Explore Raven's demo" and "Start my own memory".
 2. **Home / Ask**: large question box (the hero), recent threads, recap card, language-agnostic placeholder text.
 3. **Answer view**: answer, confidence, step trace (collapsible), source cards.
 4. **Source viewer**: embedded YouTube player seeking to `startSeconds` (YouTube IFrame Player API), moment list beside it; or article reader scrolled to the cited passage.

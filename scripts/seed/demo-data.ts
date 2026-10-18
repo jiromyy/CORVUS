@@ -1,5 +1,5 @@
 /**
- * Maya's sample history for the demo workspace (spec §17): two weeks of learning Python.
+ * Raven's sample history for the demo workspace (spec §17): two weeks of learning Python.
  * Videos are real public YouTube videos (embeddable, checked 2026-10-17).
  * Articles are original text written for this prototype.
  * Times are Asia/Manila (+08:00).

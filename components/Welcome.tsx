@@ -47,7 +47,7 @@ export function Welcome() {
 
       <div className="welcome-grid">
         <div>
-          <h3>You’re looking at Maya’s sample memory</h3>
+          <h3>You’re looking at Raven’s sample memory</h3>
           <p>Two weeks of a student learning Python: 4 real YouTube tutorials (one in Filipino), 8 Google searches, and 2 articles. Try:</p>
           <ul>
             <li>Ask “Where did I see how to fix the TypeError…?” and open the exact second</li>
@@ -58,7 +58,7 @@ export function Welcome() {
               <Link href="/recap" className="text-link">
                 2-minute recap
               </Link>{" "}
-              of her learning
+              of that learning
             </li>
           </ul>
         </div>
@@ -70,8 +70,8 @@ export function Welcome() {
           </h3>
           <ul className="trust-list">
             {[
-              "Corvus never signs in to your Google account",
-              "Your memories stay in a private space tied to this browser",
+              "Signing in with Google is optional and only proves who you are; Corvus never reads your Google account",
+              "Your memories stay private to this browser, or to your sign-in if you choose",
               "Every answer cites its sources; inferred guesses are labelled",
               "Delete everything with one click in Memory",
             ].map((t) => (
@@ -85,7 +85,7 @@ export function Welcome() {
 
       <div className="mt-6 flex flex-wrap gap-3">
         <button onClick={dismiss} className="button">
-          Explore Maya’s memory
+          Explore Raven’s memory
         </button>
         <Link href="/import" onClick={dismiss} className="button secondary">
           Use my own activity <ArrowRight size={15} />

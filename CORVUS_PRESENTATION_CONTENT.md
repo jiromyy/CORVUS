@@ -212,7 +212,7 @@ open exact source | inspect why | correct/delete memory
 
 ### Use-case caption
 
-> Maya remembers a “choir” analogy but not its source. Corvus finds the exact YouTube transcript moment, connects it to her later search on decoherence, and suggests a short audio recap for her train commute.
+> Raven remembers a “choir” analogy but not its source. Corvus finds the exact YouTube transcript moment, connects it to their later search on decoherence, and suggests a short audio recap for their train commute.
 
 ### Presenter note
 
@@ -499,12 +499,12 @@ Target duration: **2:45–2:55**. The official brief says 3 minutes. The script 
 |---:|---|---|
 | 0:00–0:20 | Brand screen, then fragmented source cards | “We consume useful ideas across YouTube, Search, websites, Maps, and audio. Later, we remember the idea—but not where it came from.” |
 | 0:20–0:38 | Corvus Home | “Corvus is a private, source-grounded memory for activity across the Google ecosystem. This prototype uses recreated apps and fictional data; it does not access a real Google account.” |
-| 0:38–1:05 | YouTube Demo: play the choir-analogy segment | “As Maya watches, Corvus captures the source, exact transcript moment, topic, time, and current Study context.” |
-| 1:05–1:28 | Search Demo, then Web Demo article | “She later searches why qubits lose information and reads an article about decoherence. The activity comes from another source, but enters the same personal memory layer.” |
-| 1:28–2:05 | Ask Corvus: choir analogy query | “Days later, she remembers the analogy but not the video. Corvus retrieves her own history, answers only from matching evidence, and links to the exact original moment.” |
-| 2:05–2:30 | Open source at timestamp; show related web source | “The answer is inspectable. She can reopen the video and see how it connects to her later search and reading.” |
-| 2:30–2:55 | Change Study to Commute; recommendations update | “Now she switches to Commute. Instead of a long lecture, Corvus recommends a seven-minute audio recap and explains the reason.” |
-| 2:55–3:15 | Memory and Controls; delete one event | “Every memory remains under her control. She can inspect what was observed or inferred, pause a source, or delete an item.” |
+| 0:38–1:05 | YouTube Demo: play the choir-analogy segment | “As Raven watches, Corvus captures the source, exact transcript moment, topic, time, and current Study context.” |
+| 1:05–1:28 | Search Demo, then Web Demo article | “Raven later searches why qubits lose information and reads an article about decoherence. The activity comes from another source, but enters the same personal memory layer.” |
+| 1:28–2:05 | Ask Corvus: choir analogy query | “Days later, Raven remembers the analogy but not the video. Corvus retrieves their own history, answers only from matching evidence, and links to the exact original moment.” |
+| 2:05–2:30 | Open source at timestamp; show related web source | “The answer is inspectable. They can reopen the video and see how it connects to their later search and reading.” |
+| 2:30–2:55 | Change Study to Commute; recommendations update | “Now Raven switches to Commute. Instead of a long lecture, Corvus recommends a seven-minute audio recap and explains the reason.” |
+| 2:55–3:15 | Memory and Controls; delete one event | “Every memory remains under their control. They can inspect what was observed or inferred, pause a source, or delete an item.” |
 | 3:15–3:35 | Architecture/technology overlay and closing screen | “Firebase handles the app and identity, Firestore stores and retrieves memories, Gemini grounds recall and understanding, and Cloud Run hosts the working prototype. Corvus helps you remember and use what you already experienced.” |
 
 ### Recording rules

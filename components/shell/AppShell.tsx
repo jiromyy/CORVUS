@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Wordmark } from "../Brand";
+import { Account } from "./Account";
 import { EvidenceProvider } from "../Evidence";
 import { NEW_CONVERSATION_EVENT } from "./events";
 
@@ -104,15 +105,7 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
           </div>
           <Laptop size={16} className="faint" />
         </Link>
-        <div className="profile-card">
-          <div className="avatar" aria-hidden>
-            M
-          </div>
-          <div>
-            <strong>Maya’s sample + yours</strong>
-            <span>Private to this browser</span>
-          </div>
-        </div>
+        <Account />
         <p className="sidebar-note">Corvus is a hackathon concept and is not a Google product.</p>
       </aside>
     </>

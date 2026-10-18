@@ -109,7 +109,7 @@ export function LibraryView() {
   }
 
   async function deleteOwn() {
-    if (!window.confirm("Delete everything you imported or captured? Maya's sample data is not affected.")) return;
+    if (!window.confirm("Delete everything you imported or captured? Raven's sample data is not affected.")) return;
     setBusy("delete-all");
     await fetch("/api/workspace", { method: "DELETE" });
     await load();
@@ -139,7 +139,7 @@ export function LibraryView() {
       <div className="memory-options">
         <label className="check-row">
           <input type="checkbox" checked={includeSample} disabled={busy === "sample"} onChange={(e) => toggleSample(e.target.checked)} />
-          Include Maya’s sample data
+          Include Raven’s sample data
         </label>
         <label className="check-row">
           <input type="checkbox" checked={showMoments} onChange={(e) => setShowMoments(e.target.checked)} />
@@ -211,7 +211,7 @@ export function LibraryView() {
       <section className="panel danger-zone">
         <div>
           <h3>Delete my data</h3>
-          <p>Remove everything you imported or captured. Maya’s sample is not affected.</p>
+          <p>Remove everything you imported or captured. Raven’s sample is not affected.</p>
         </div>
         <button onClick={deleteOwn} disabled={busy === "delete-all"} className="button danger">
           <Trash2 size={15} /> {busy === "delete-all" ? "Deleting…" : "Delete all"}

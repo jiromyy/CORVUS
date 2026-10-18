@@ -1,5 +1,5 @@
 /**
- * Anonymous per-browser workspace (spec §12). The workspace ID lives in an httpOnly cookie
+ * Per-browser workspace (spec §12), optionally linked to a Google account through Firebase sign-in (lib/auth.ts). The workspace ID lives in an httpOnly cookie
  * signed with WORKSPACE_COOKIE_SECRET, so the server never trusts a workspace ID from the request body.
  * Call only from Route Handlers or Server Functions (they may set the cookie).
  */
@@ -41,16 +41,31 @@ export async function getWorkspace(): Promise<Workspace> {
   const existing = verify(jar.get(COOKIE_NAME)?.value);
   if (existing) return { id: existing, demoId, isNew: false };
 
+  const id = await createWorkspace();
+  await switchWorkspace(id);
+  return { id, demoId, isNew: true };
+}
+
+export async function createWorkspace() {
   const id = `ws_${randomBytes(12).toString("hex")}`;
   await ensureWorkspace(id);
-  jar.set(COOKIE_NAME, sign(id), {
+  return id;
+}
+
+/** Points this browser at a workspace. Only call after the caller is entitled to it (e.g. a verified sign-in). */
+export async function switchWorkspace(id: string) {
+  (await cookies()).set(COOKIE_NAME, sign(id), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: MAX_AGE,
   });
-  return { id, demoId, isNew: true };
+}
+
+/** Forgets this browser's workspace; the next request starts a fresh anonymous one. */
+export async function clearWorkspace() {
+  (await cookies()).delete(COOKIE_NAME);
 }
 
 /** The visitor's workspace plus the memory scope for queries: their own, and the sample unless hidden. */

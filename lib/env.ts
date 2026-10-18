@@ -13,6 +13,10 @@ const envSchema = z.object({
   WORKSPACE_COOKIE_SECRET: z.string().optional(),
   DEMO_WORKSPACE_ID: z.string().min(1).default("demo-maya"),
   GEMINI_API_KEY: z.string().optional(),
+  // Firebase web app config for optional Google sign-in. Public by design; sign-in is hidden until all are set.
+  FIREBASE_API_KEY: z.string().optional(),
+  FIREBASE_AUTH_DOMAIN: z.string().optional(),
+  FIREBASE_APP_ID: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -45,5 +49,6 @@ export function envStatus() {
     ttsModel: has("GEMINI_TTS_MODEL"),
     bucket: has("GCS_BUCKET"),
     cookieSecret: has("WORKSPACE_COOKIE_SECRET"),
+    firebaseAuth: has("FIREBASE_API_KEY") && has("FIREBASE_AUTH_DOMAIN") && has("FIREBASE_APP_ID"),
   };
 }

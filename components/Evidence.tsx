@@ -60,7 +60,7 @@ const KIND: Record<MemoryView["memoryType"], { label: string; tone: "success" | 
 };
 
 const ORIGIN: Record<NonNullable<MemoryView["sourceMode"]>, string> = {
-  demo_seed: "Maya’s sample history",
+  demo_seed: "Raven’s sample history",
   user_import: "Google Takeout import",
   user_capture: "Chrome extension",
 };

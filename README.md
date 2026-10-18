@@ -31,9 +31,9 @@ Next.js 16 (App Router, TypeScript, Tailwind) · Gemini on Google Cloud via `@go
 | `npm run dev`                                         | Dev server                                             |
 | `npm run build`                                       | Production build (standalone output for the container) |
 | `npm run lint` / `npm run typecheck` / `npm test` | Checks                                                 |
-| `npm run seed` | Seed Maya's demo memories (reuses cached video analyses; `-- --fresh` re-analyses) |
+| `npm run seed` | Seed Raven's demo memories (reuses cached video analyses; `-- --fresh` re-analyses) |
 | `npm run seed:catalog` | Write the curated suggestion catalogue with embeddings |
-| `npm run seed:recap` | Pre-generate Maya's audio recap (`-- fil` for Filipino) |
+| `npm run seed:recap` | Pre-generate Raven's audio recap (`-- fil` for Filipino) |
 | `npm run ext:zip` | Rebuild `public/corvus-capture.zip` from `extension/` (Windows PowerShell) |
 | `npm run spike:models`                                | List Gemini models visible to the project/location     |
 | `npm run spike:video -- "<youtube url>"`              | Gemini video → timestamped moments                    |
@@ -41,6 +41,16 @@ Next.js 16 (App Router, TypeScript, Tailwind) · Gemini on Google Cloud via `@go
 | `npm run spike:tts`                                   | Gemini TTS → WAV files in `spikes/out/`             |
 | `npm run spike:tools`                                 | Agent loop: tool call → cited JSON answer             |
 | `npm run spike:firestore`                             | Workspace-filtered Firestore vector search             |
+
+## Optional Google sign-in
+
+Corvus works without an account (an anonymous workspace per browser). Signing in with Google through Firebase Authentication links that workspace to the account so it follows you to other browsers. It proves identity only; no Google data scopes are requested.
+
+1. Add Firebase to the Google Cloud project, then **Authentication → Sign-in method → Google → Enable**.
+2. **Authentication → Settings → Authorized domains**: add `localhost` and the Cloud Run hostname.
+3. Register a web app and put its `apiKey`, `authDomain`, and `appId` in `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_APP_ID` (`.env.local`, and `--update-env-vars` on Cloud Run). These values are public by design.
+
+The first sign-in on a browser keeps that browser's memories; signing in on another browser switches to the account's workspace. Signing out starts a fresh anonymous workspace.
 
 ## Chrome extension (automatic capture)
 
