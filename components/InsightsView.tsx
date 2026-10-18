@@ -1,8 +1,9 @@
 "use client";
 
-import { Activity, Clock3, Languages, MessageSquare, Repeat, Search } from "lucide-react";
+import { Activity, Check, Clock3, Languages, MessageSquare, Repeat, Search, ThumbsDown, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { FeedbackMap, Verdict } from "@/lib/feedback";
 import type { Insights, Range } from "@/lib/insights";
 
 const RANGE_LABEL: Record<Range, string> = { "7d": "Last 7 days", "30d": "Last 30 days", all: "All time" };
@@ -30,6 +31,31 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
 export function InsightsView() {
   const [range, setRange] = useState<Range>("30d");
   const [data, setData] = useState<Insights | undefined>();
+  const [feedback, setFeedbackMap] = useState<FeedbackMap>({});
+
+  useEffect(() => {
+    fetch("/api/feedback")
+      .then((r) => (r.ok ? r.json() : { feedback: {} }))
+      .catch(() => ({ feedback: {} }))
+      .then((body) => setFeedbackMap(body.feedback ?? {}));
+  }, []);
+
+  /** Right / not right on a pattern, saved for this workspace. */
+  const verdictFor = (id: string, title: string): PatternFeedback => {
+    const key = `pattern:${id}`.replace(/[.~*/[\]]/g, "_");
+    return {
+      verdict: feedback[key]?.verdict,
+      onVerdict: async (verdict) => {
+        const res = await fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, verdict, title }),
+        }).catch(() => undefined);
+        const body = await res?.json().catch(() => undefined);
+        if (body?.feedback) setFeedbackMap(body.feedback);
+      },
+    };
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -195,11 +221,12 @@ export function InsightsView() {
             <div className="section-heading">
               <div>
                 <h2 id="patterns-title">Patterns Corvus may use</h2>
-                <p>For suggestions and recaps. Each one comes from your activity, and you can ask about it.</p>
+                <p>Each one comes from your activity. Tell Corvus whether it’s right, or ask about it.</p>
               </div>
             </div>
             {data.repeatedSearches.map((r) => (
               <PatternRow
+                {...verdictFor(`repeat:${r.query}`, `Searched “${r.query}” ${r.times} times`)}
                 key={r.query}
                 icon={Search}
                 title={`You searched “${r.query}” ${r.times} times`}
@@ -209,6 +236,7 @@ export function InsightsView() {
             ))}
             {data.peak && data.peak.count > 1 && (
               <PatternRow
+                {...verdictFor("peak", `Most active ${BUCKET_NAME[data.peak.label]}`)}
                 icon={Clock3}
                 title={`Most of your activity happens ${BUCKET_NAME[data.peak.label]}`}
                 detail={`Inferred from ${data.peak.count} activities · a habit, not a rule; pick your context in For you`}
@@ -218,6 +246,7 @@ export function InsightsView() {
             )}
             {data.languages.length > 1 && (
               <PatternRow
+                {...verdictFor("languages", "Learns in several languages")}
                 icon={Languages}
                 title={`You learn in ${data.languages.map((l) => LANGUAGE_NAME[l.language] ?? l.language).join(" and ")}`}
                 detail="Observed · Corvus answers in the language you ask in and searches across both"
@@ -262,19 +291,47 @@ function Donut({ total, parts }: { total: number; parts: Array<{ value: number; 
   );
 }
 
-function PatternRow({ icon: Icon, title, detail, href, cta = "Ask about this" }: { icon: typeof Activity; title: string; detail: string; href: string; cta?: string }) {
+type PatternFeedback = { verdict?: Verdict; onVerdict: (v: Verdict | null) => void };
+
+function PatternRow({
+  icon: Icon,
+  title,
+  detail,
+  href,
+  cta = "Ask about this",
+  verdict,
+  onVerdict,
+}: { icon: typeof Activity; title: string; detail: string; href: string; cta?: string } & PatternFeedback) {
   return (
-    <div className="pattern-row">
+    <div className={`pattern-row ${verdict === "wrong" ? "dismissed" : ""}`}>
       <span>
         <Icon size={16} />
       </span>
       <div>
         <strong>{title}</strong>
-        <small>{detail}</small>
+        <small>{verdict === "wrong" ? "You said this isn’t right · Corvus won’t treat it as a pattern" : detail}</small>
       </div>
-      <Link href={href} className="button secondary compact">
-        <MessageSquare size={14} /> {cta}
-      </Link>
+      <div className="pattern-actions">
+        {verdict ? (
+          <button className={`feedback-chip ${verdict === "right" ? "on" : "off"}`} onClick={() => onVerdict(null)} title="Undo">
+            {verdict === "right" ? <Check size={12} /> : <ThumbsDown size={12} />} {verdict === "right" ? "Confirmed" : "Not right"} · undo
+          </button>
+        ) : (
+          <>
+            <button className="feedback-chip" onClick={() => onVerdict("right")} aria-label={`Right: ${title}`}>
+              <ThumbsUp size={12} /> Right
+            </button>
+            <button className="feedback-chip" onClick={() => onVerdict("wrong")} aria-label={`Not right: ${title}`}>
+              <ThumbsDown size={12} /> Not right
+            </button>
+          </>
+        )}
+        {verdict !== "wrong" && (
+          <Link href={href} className="button secondary compact">
+            <MessageSquare size={14} /> {cta}
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

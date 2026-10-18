@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Corvus Capture",
-  "version": "0.1.0",
-  "description": "Remembers the YouTube videos you watch and the Google searches you make in your private Corvus memory. Hackathon prototype; not a Google product.",
-  "permissions": ["storage"],
+  "version": "0.2.0",
+  "description": "Remembers the YouTube videos you watch, the Google searches you make, and pages on websites you approve, in your private Corvus memory. Hackathon prototype; not a Google product.",
+  "permissions": ["storage", "tabs"],
   "host_permissions": [
     "https://corvus-378059077328.asia-southeast1.run.app/*",
     "http://localhost:3000/*"

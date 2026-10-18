@@ -17,9 +17,24 @@ async function remember(entry) {
   await chrome.storage.local.set({ recent: next });
 }
 
+// Capture settings chosen in Corvus (pause, per-source switches, remembered websites); refreshed every 2 minutes.
+let serverSettings = { at: 0, value: null };
+async function captureSettings(s) {
+  if (Date.now() - serverSettings.at < 2 * 60_000) return serverSettings.value;
+  try {
+    const res = await fetch(`${s.base}/api/capture/settings`, { headers: { Authorization: `Bearer ${s.token}` } });
+    serverSettings = { at: Date.now(), value: res.ok ? await res.json() : null };
+  } catch {
+    serverSettings = { at: Date.now(), value: null };
+  }
+  return serverSettings.value;
+}
+
 async function capture(record) {
   const s = await settings();
   if (!s.enabled || !s.token) return { skipped: !s.enabled ? "paused" : "not connected" };
+  const remote = await captureSettings(s);
+  if (remote?.paused) return { skipped: "paused in Corvus" };
 
   const key = `${record.kind}|${record.videoId ?? record.query ?? record.url}`;
   if (Date.now() - (recentlySent.get(key) ?? 0) < DEDUPE_MS) return { skipped: "duplicate" };
@@ -70,6 +85,18 @@ async function connect(code, server) {
   await chrome.storage.local.set({ token: body.token, server, recent: [] });
   return { ok: true };
 }
+
+// Pages on websites the user chose to remember automatically (Settings → Automatically remembered websites).
+chrome.tabs.onUpdated.addListener(async (_tabId, change, tab) => {
+  if (change.status !== "complete" || !tab.url || tab.incognito || !/^https:/.test(tab.url)) return;
+  const s = await settings();
+  if (!s.enabled || !s.token) return;
+  const remote = await captureSettings(s);
+  if (!remote || remote.paused || !remote.domains?.length) return;
+  const host = new URL(tab.url).hostname.toLowerCase().replace(/^www\./, "");
+  if (!remote.domains.some((d) => host === d || host.endsWith(`.${d}`))) return;
+  capture({ kind: "visited", title: (tab.title || host).slice(0, 500), url: tab.url, time: new Date().toISOString() });
+});
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   const work =

@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowUpRight, PanelRightOpen, RotateCcw, Search, Trash2 } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Link2, PanelRightOpen, RotateCcw, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { SourceKind } from "@/lib/ai/schemas";
 import type { MemoryView } from "@/lib/db/store";
+import type { ThreadSummary } from "@/lib/threads";
 import { secondsToClock } from "@/lib/time";
 import { useEvidence } from "./Evidence";
 import { MEMORY_FORGOTTEN_EVENT } from "./shell/events";
@@ -36,6 +37,15 @@ export function LibraryView() {
     setHiddenCount(body.hiddenCount);
     setIncludeSample(body.includeSample);
   }
+
+  const [threads, setThreads] = useState<ThreadSummary[]>([]);
+
+  useEffect(() => {
+    fetch("/api/threads")
+      .then((r) => (r.ok ? r.json() : { threads: [] }))
+      .catch(() => ({ threads: [] }))
+      .then((body) => setThreads(body.threads ?? []));
+  }, [memories?.length]);
 
   useEffect(() => {
     let cancelled = false;
@@ -153,6 +163,42 @@ export function LibraryView() {
         )}
       </div>
 
+      {threads[0] && (
+        <div className="thread-strip">
+          <Link href={`/library/thread?t=${threads[0].id}`} className="thread-highlight">
+            <span className="thread-icon">
+              <Link2 size={20} />
+            </span>
+            <div className="min-w-0">
+              <span className="badge accent">Active interest thread</span>
+              <h2 className="capitalize">{threads[0].topic}</h2>
+              <p>
+                {[threads[0].counts.videos && `${threads[0].counts.videos} videos`, threads[0].counts.pages && `${threads[0].counts.pages} pages`, threads[0].counts.searches && `${threads[0].counts.searches} searches`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
+            <div className="mini-network" aria-hidden>
+              <i />
+              <i />
+              <i />
+              <i />
+            </div>
+            <ChevronRight size={20} />
+          </Link>
+          {threads.length > 1 && (
+            <div className="thread-chips">
+              <span className="faint text-[12.5px]">More threads:</span>
+              {threads.slice(1, 6).map((t) => (
+                <Link key={t.id} href={`/library/thread?t=${t.id}`} className="chip capitalize">
+                  {t.topic} <small className="faint">{t.count}</small>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <section className="timeline" aria-label="Memory timeline">
         {days.map(([day, items]) => (
           <div key={day}>
@@ -176,6 +222,7 @@ export function LibraryView() {
                     {m.excerpt && m.excerpt !== m.title && <p>{m.excerpt}</p>}
                     <div className="memory-meta">
                       <span className="badge">{SOURCE_LABEL[m.source]}</span>
+                      {m.topics[0] && <span className="badge accent capitalize">{m.topics[0]}</span>}
                       {m.memoryType === "video_moment" && m.startSeconds !== undefined && (
                         <span className="badge accent">Moment · {secondsToClock(m.startSeconds)}</span>
                       )}

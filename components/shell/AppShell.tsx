@@ -5,8 +5,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Wordmark } from "../Brand";
+import { CaptureCard } from "../CaptureControls";
 import { Account } from "./Account";
+import { RecentQuestions } from "./RecentQuestions";
 import { EvidenceProvider } from "../Evidence";
+import { Welcome } from "../Welcome";
 import { NEW_CONVERSATION_EVENT } from "./events";
 import { THEME_EVENT, applyTheme, currentTheme, setTheme, type ThemePreference } from "./theme";
 
@@ -27,7 +30,8 @@ const TITLES: Record<string, string> = {
   "/insights": "Insights",
   "/sources": "Sources",
   "/import": "Import & capture",
-  "/settings": "Settings",
+  "/settings": "Privacy & memory",
+  "/extension": "Browser extension",
   "/watch": "Video moment",
   "/read": "Article",
 };
@@ -49,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Menu size={20} />
             </button>
             <div className="topbar-title">
-              <span>{TITLES[pathname] ?? "Corvus"}</span>
+              <span>{TITLES[pathname] ?? (pathname === "/library/thread" ? "Interest thread" : "Corvus")}</span>
               {pathname === "/" && (
                 <span className="status-inline">
                   <span className="status-dot" /> Memories ready
@@ -67,6 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+      <Welcome />
     </EvidenceProvider>
   );
 }
@@ -98,7 +103,7 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
         <nav className="nav-list" aria-label="Main">
           {NAV.map(({ href, label, icon: Icon }) => {
             // Import lives under Sources.
-            const active = pathname === href || (href === "/sources" && pathname === "/import");
+            const active = pathname === href || (href === "/sources" && pathname === "/import") || (href === "/library" && pathname.startsWith("/library/"));
             return (
               <Link key={href} href={href} onClick={onClose} className={`nav-item ${active ? "active" : ""}`} aria-current={active ? "page" : undefined}>
                 <Icon size={18} />
@@ -107,14 +112,12 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
             );
           })}
         </nav>
+        <RecentQuestions onNavigate={onClose} />
         <div className="sidebar-spacer" />
-        <Link href="/import#extension" className="capture-card" onClick={onClose}>
-          <span className="capture-dot" />
-          <div>
-            <strong>Automatic capture</strong>
-            <span>YouTube + Search via the extension</span>
-          </div>
-          <Laptop size={16} className="faint" />
+        <CaptureCard onNavigate={onClose} />
+        <Link href="/extension" onClick={onClose} className={`nav-item ${pathname === "/extension" ? "active" : ""}`} aria-current={pathname === "/extension" ? "page" : undefined}>
+          <Laptop size={18} />
+          <span>Browser extension</span>
         </Link>
         <Link href="/settings" onClick={onClose} className={`nav-item ${pathname === "/settings" ? "active" : ""}`} aria-current={pathname === "/settings" ? "page" : undefined}>
           <Settings size={18} />

@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowRight, Compass, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Compass, ExternalLink, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { FeedbackMap, Verdict } from "@/lib/feedback";
 import type { Focus, Mode, Suggestion } from "@/lib/foryou";
 import { LanguageBadge } from "./ui";
 
@@ -42,7 +43,7 @@ function writeStorage(key: string, value: unknown) {
   }
 }
 
-type Data = { mode: Mode; focus?: Focus; suggestions: Suggestion[] };
+type Data = { mode: Mode; focus?: Focus; suggestions: Suggestion[]; feedback?: FeedbackMap };
 
 export function ForYouPanel() {
   const [mode, setMode] = useState<Mode | undefined>();
@@ -51,6 +52,7 @@ export function ForYouPanel() {
   const [refreshing, setRefreshing] = useState(false);
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [editing, setEditing] = useState(false);
+  const [openWhy, setOpenWhy] = useState<string | null>(null);
   const [focusDraft, setFocusDraft] = useState("");
 
   useEffect(() => {
@@ -94,6 +96,18 @@ export function ForYouPanel() {
     setDismissed(next);
     writeStorage(STORAGE_DISMISSED, next);
   }
+
+  /** Records a verdict on the server, then reloads so the list reflects it (dropped, boosted, confirmed). */
+  async function sendFeedback(key: string, verdict: Verdict | null, meta: { kind?: string; channel?: string; title?: string } = {}) {
+    setRefreshing(true);
+    await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, verdict, ...meta }),
+    }).catch(() => undefined);
+    setReloadKey((k) => k + 1);
+  }
+  const verdictOf = (key: string) => data?.feedback?.[key.replace(/[.~*/[\]]/g, "_")]?.verdict;
 
   async function saveFocus(label: string | null) {
     await fetch("/api/foryou/focus", {
@@ -139,9 +153,18 @@ export function ForYouPanel() {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
               <span className="muted">{data.focus.source === "user" ? "Your focus:" : "It looks like you’re focused on"}</span>
               <strong>{data.focus.label}</strong>
-              <span className={`badge ${data.focus.source === "user" ? "success" : "accent"}`}>
-                {data.focus.source === "user" ? "Set by you" : `Inferred · ${data.focus.confidence} confidence`}
+              <span className={`badge ${data.focus.source === "user" || verdictOf(`focus:${data.focus.label}`) === "right" ? "success" : "accent"}`}>
+                {data.focus.source === "user"
+                  ? "Set by you"
+                  : verdictOf(`focus:${data.focus.label}`) === "right"
+                    ? "Confirmed by you"
+                    : `Inferred · ${data.focus.confidence} confidence`}
               </span>
+              {data.focus.source !== "user" && verdictOf(`focus:${data.focus.label}`) !== "right" && (
+                <button onClick={() => sendFeedback(`focus:${data.focus!.label}`, "right", { title: data.focus!.label })} className="feedback-chip">
+                  <ThumbsUp size={12} /> That’s right
+                </button>
+              )}
               <button onClick={() => { setFocusDraft(data.focus!.label); setEditing(true); }} className="text-link text-[13px]">
                 {data.focus.source === "user" ? "Change" : "Not right? Edit"}
               </button>
@@ -200,16 +223,44 @@ export function ForYouPanel() {
                 {s.durationSeconds !== undefined && <span>· {s.durationSeconds ? `${Math.max(1, Math.round(s.durationSeconds / 60))} min` : "Live"}</span>}
                 <LanguageBadge language={s.language} />
               </p>
-              <div className="why-panel">
-                <strong>
-                  <Sparkles size={13} /> Why this?
-                </strong>
-                <ul>
-                  {s.reasons.map((r) => (
-                    <li key={r}>{r}</li>
-                  ))}
-                </ul>
-              </div>
+              <button
+                className="why-button"
+                aria-expanded={openWhy === s.id}
+                aria-controls={`why-${s.id}`}
+                onClick={() => setOpenWhy(openWhy === s.id ? null : s.id)}
+              >
+                <Sparkles size={13} /> Why this? <ChevronDown size={13} className="chev" />
+              </button>
+              {openWhy === s.id && (
+                <div className="why-panel" id={`why-${s.id}`}>
+                  <ul>
+                    {s.reasons.map((r) => (
+                      <li key={r}>{r}</li>
+                    ))}
+                  </ul>
+                  <div className="feedback-row">
+                    <span>Is this right for you?</span>
+                    {verdictOf(`suggestion:${s.id}`) === "more" ? (
+                      <button className="feedback-chip on" onClick={() => sendFeedback(`suggestion:${s.id}`, null)}>
+                        <Check size={12} /> More like this · undo
+                      </button>
+                    ) : (
+                      <button
+                        className="feedback-chip"
+                        onClick={() => sendFeedback(`suggestion:${s.id}`, "more", { kind: s.kind, channel: s.channel, title: s.title })}
+                      >
+                        <ThumbsUp size={12} /> More like this
+                      </button>
+                    )}
+                    <button
+                      className="feedback-chip"
+                      onClick={() => sendFeedback(`suggestion:${s.id}`, "wrong", { kind: s.kind, channel: s.channel, title: s.title })}
+                    >
+                      <ThumbsDown size={12} /> Not right
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <footer>
               {s.external ? (

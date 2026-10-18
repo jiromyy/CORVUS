@@ -4,7 +4,8 @@ import { AlertCircle, ArrowRight, ArrowUp, Bug, Calculator, CheckCircle2, Chevro
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { AskResult } from "@/lib/agent/run";
 import { Mark } from "./Brand";
-import { NEW_CONVERSATION_EVENT } from "./shell/events";
+import { ASK_EVENT, NEW_CONVERSATION_EVENT } from "./shell/events";
+import { rememberQuestion } from "./shell/RecentQuestions";
 import { SourceCard } from "./SourceCard";
 import { SpeakButton } from "./SpeakButton";
 
@@ -63,6 +64,7 @@ export function AskPanel() {
     if (!text || state.status === "loading") return;
     setQuestion("");
     setState({ status: "loading", question: text });
+    rememberQuestion(text);
     window.scrollTo({ top: 0, behavior: "smooth" });
     try {
       const res = await fetch("/api/ask", {
@@ -87,6 +89,13 @@ export function AskPanel() {
     void ask(q);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
   }, []);
+
+  // Recent questions in the sidebar re-ask without leaving the page.
+  useEffect(() => {
+    const onAsk = (e: Event) => void ask((e as CustomEvent<string>).detail);
+    window.addEventListener(ASK_EVENT, onAsk);
+    return () => window.removeEventListener(ASK_EVENT, onAsk);
+  });
 
   const composer = (variant: "hero" | "follow-up") => (
     <Composer

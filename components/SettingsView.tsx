@@ -1,9 +1,9 @@
 "use client";
 
 import { Check, Download, Laptop, Moon, RotateCcw, Sun, Trash2, UserRound } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { MemoryView } from "@/lib/db/store";
+import { CaptureControls } from "./CaptureControls";
 import { useEvidence } from "./Evidence";
 import { THEME_EVENT, currentTheme, setTheme, type ThemePreference } from "./shell/theme";
 
@@ -93,9 +93,9 @@ export function SettingsView() {
         <div>
           <span className="eyebrow">Settings</span>
           <h1>
-            Your memory, <em>your rules</em>
+            Privacy &amp; <em>memory</em>
           </h1>
-          <p>Choose how Corvus looks, what it remembers, and what it forgets.</p>
+          <p>Corvus works best when its memory is understandable, correctable, and yours to control.</p>
         </div>
       </header>
 
@@ -138,6 +138,8 @@ export function SettingsView() {
         </div>
       </section>
 
+      <CaptureControls />
+
       <section className="panel settings-section" aria-labelledby="privacy-title">
         <h2 id="privacy-title">Privacy &amp; memory</h2>
         <p>
@@ -172,15 +174,6 @@ export function SettingsView() {
             </button>
           </div>
         )}
-        <div className="setting-row">
-          <div>
-            <h3>Automatic capture</h3>
-            <p>Pause or resume from the Corvus extension’s popup. It only ever captures YouTube watches and Google searches.</p>
-          </div>
-          <Link href="/sources" className="button secondary compact">
-            Manage sources
-          </Link>
-        </div>
         <div className="setting-row">
           <div>
             <h3>Download your Corvus data</h3>

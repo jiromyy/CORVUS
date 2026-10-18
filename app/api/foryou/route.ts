@@ -1,4 +1,5 @@
 import { inferFocus, loadMemories, MODES, suggestions, type Mode } from "@/lib/foryou";
+import { applySuggestionFeedback, getFeedback } from "@/lib/feedback";
 import { getScope } from "@/lib/workspace";
 
 /** Inferred focus plus suggestions for the context the user picked (study, commute, rest). */
@@ -11,6 +12,8 @@ export async function GET(request: Request) {
     console.warn("focus inference failed:", err instanceof Error ? err.message : err);
     return undefined;
   });
-  const items = await suggestions({ workspaceIds, hidden, mode, focus, memories });
-  return Response.json({ mode, focus, suggestions: items, workspaceId: ws.id });
+  // Extra candidates so "not right" feedback can drop some and still leave a full list.
+  const [candidates, feedback] = await Promise.all([suggestions({ workspaceIds, hidden, mode, focus, memories, limit: 10 }), getFeedback(ws.id)]);
+  const items = applySuggestionFeedback(candidates, feedback, 5);
+  return Response.json({ mode, focus, suggestions: items, feedback, workspaceId: ws.id });
 }

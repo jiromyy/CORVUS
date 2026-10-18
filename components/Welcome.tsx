@@ -1,12 +1,12 @@
 "use client";
 
-import { ArrowRight, Check, ShieldCheck, WandSparkles } from "lucide-react";
+import { ArrowRight, Check, ShieldCheck, WandSparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "corvus.welcomed";
 
-/** First-visit introduction: what Corvus is, what the sample is, what to try, and the privacy promises. */
+/** First-visit popup: what Corvus is, what the sample is, what to try, and the privacy promises. Shown once per browser. */
 export function Welcome() {
   const [show, setShow] = useState(false);
 
@@ -30,13 +30,27 @@ export function Welcome() {
     }
   }
 
+  useEffect(() => {
+    if (!show) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && dismiss();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [show]);
+
   if (!show) return null;
 
   return (
-    <section aria-labelledby="welcome-title" className="panel welcome">
-      <span className="badge accent">
-        <WandSparkles size={12} /> Private by design
-      </span>
+    <div className="modal-layer">
+      <button className="modal-scrim" aria-label="Close welcome" onClick={dismiss} />
+      <section role="dialog" aria-modal="true" aria-labelledby="welcome-title" className="panel welcome">
+      <div className="flex items-center justify-between">
+        <span className="badge accent">
+          <WandSparkles size={12} /> Private by design
+        </span>
+        <button className="icon-button compact" onClick={dismiss} aria-label="Close welcome" autoFocus>
+          <X size={16} />
+        </button>
+      </div>
       <h2 id="welcome-title">
         Welcome to Corvus. <em>Your activity, as a memory you can use.</em>
       </h2>
@@ -73,7 +87,7 @@ export function Welcome() {
               "Signing in with Google is optional and only proves who you are; Corvus never reads your Google account",
               "Your memories stay private to this browser, or to your sign-in if you choose",
               "Every answer cites its sources; inferred guesses are labelled",
-              "Delete everything with one click in Memory",
+              "Delete everything with one click in Settings",
             ].map((t) => (
               <li key={t}>
                 <Check size={14} /> {t}
@@ -92,5 +106,6 @@ export function Welcome() {
         </Link>
       </div>
     </section>
+    </div>
   );
 }
