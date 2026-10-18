@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "spikes/out/**",
     "extension/**",
     "Google Corvus/**",
+    ".claude/**",
   ]),
 ]);
 

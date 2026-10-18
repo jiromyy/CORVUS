@@ -9,3 +9,5 @@ spikes/out
 !README.md
 # The v2 design prototype kept alongside the app for reference; not part of the build.
 Google Corvus
+# Local Claude Code state, including other sessions' worktrees (full copies of the source).
+.claude
