@@ -7,3 +7,5 @@ archive
 spikes/out
 *.md
 !README.md
+# The v2 design prototype kept alongside the app for reference; not part of the build.
+Google Corvus

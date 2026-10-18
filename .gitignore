@@ -49,3 +49,6 @@ application_default_credentials.json
 # local Claude Code state (launch.json is shared)
 /.claude/settings.local.json
 /.claude/worktrees/
+
+# v2 design prototype (reference only)
+/Google Corvus/
