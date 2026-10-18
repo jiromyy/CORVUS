@@ -1,15 +1,26 @@
 "use client";
 
+import { ArrowUpRight, PanelRightOpen, RotateCcw, Search, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { SourceKind } from "@/lib/ai/schemas";
 import type { MemoryView } from "@/lib/db/store";
-import { SourceCard } from "./SourceCard";
-import { SOURCE_LABEL } from "./ui";
+import { secondsToClock } from "@/lib/time";
+import { useEvidence } from "./Evidence";
+import { MEMORY_FORGOTTEN_EVENT } from "./shell/events";
+import { LanguageBadge, SOURCE_LABEL, SourceIcon, formatClockTime, memoryHref } from "./ui";
 
 type Filter = "all" | SourceKind;
 
-/** Everything Corvus remembers for this visitor, with delete and reset. */
+const TYPE_CLASS: Record<SourceKind, string> = { youtube: "", google_search: "search", web: "web" };
+const ORIGIN_LABEL = { demo_seed: "Sample", user_import: "Takeout", user_capture: "Extension" } as const;
+
+const dayLabel = (iso: string) =>
+  new Intl.DateTimeFormat("en-PH", { weekday: "long", month: "short", day: "numeric", timeZone: "Asia/Manila" }).format(new Date(iso));
+
+/** Everything Corvus remembers for this visitor, as a timeline, with forget, restore, and delete-all. */
 export function LibraryView() {
+  const { openEvidence, notify } = useEvidence();
   const [memories, setMemories] = useState<MemoryView[] | undefined>();
   const [hiddenCount, setHiddenCount] = useState(0);
   const [includeSample, setIncludeSample] = useState(true);
@@ -36,8 +47,16 @@ export function LibraryView() {
         setHiddenCount(body.hiddenCount);
         setIncludeSample(body.includeSample);
       });
+    // Forgetting from the evidence drawer removes the row here too.
+    const onForgot = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      setMemories((all) => all?.filter((m) => m.id !== id && !m.id.startsWith(`${id}__`)));
+      setHiddenCount((n) => n + 1);
+    };
+    window.addEventListener(MEMORY_FORGOTTEN_EVENT, onForgot);
     return () => {
       cancelled = true;
+      window.removeEventListener(MEMORY_FORGOTTEN_EVENT, onForgot);
     };
   }, []);
 
@@ -52,12 +71,22 @@ export function LibraryView() {
     );
   }, [memories, filter, showMoments, query]);
 
+  const days = useMemo(() => {
+    const groups = new Map<string, MemoryView[]>();
+    for (const m of visible) {
+      const key = dayLabel(m.occurredAt);
+      groups.set(key, [...(groups.get(key) ?? []), m]);
+    }
+    return [...groups.entries()];
+  }, [visible]);
+
   async function remove(id: string) {
     setBusy(id);
     await fetch(`/api/memories/${encodeURIComponent(id)}`, { method: "DELETE" });
     setMemories((all) => all?.filter((m) => m.id !== id && !m.id.startsWith(`${id}__`)));
     setHiddenCount((n) => n + 1);
     setBusy(undefined);
+    notify("Forgotten. It won’t be used in future answers.");
   }
 
   async function reset() {
@@ -65,6 +94,7 @@ export function LibraryView() {
     await fetch("/api/workspace/reset", { method: "POST" });
     await load();
     setBusy(undefined);
+    notify("Sample memories restored");
   }
 
   async function toggleSample(value: boolean) {
@@ -84,78 +114,109 @@ export function LibraryView() {
     await fetch("/api/workspace", { method: "DELETE" });
     await load();
     setBusy(undefined);
+    notify("Your imported and captured data was deleted");
   }
 
-  if (!memories) return <p className="animate-pulse text-[var(--muted)]">Loading memories…</p>;
+  if (!memories) return <p className="loading-line">Loading memories…</p>;
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <label htmlFor="filter-q" className="sr-only">
-          Filter memories
-        </label>
-        <input
-          id="filter-q"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Filter by title…"
-          className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-        />
-        <div role="group" aria-label="Source" className="flex flex-wrap gap-1">
+      <div className="memory-toolbar">
+        <div role="group" aria-label="Source" className="segmented">
           {(["all", "youtube", "google_search", "web"] as Filter[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              aria-pressed={filter === f}
-              className={`rounded-full border px-3 py-1.5 text-sm ${
-                filter === f ? "border-[var(--accent)] text-[var(--foreground)]" : "border-[var(--border)] text-[var(--muted)]"
-              }`}
-            >
+            <button key={f} onClick={() => setFilter(f)} aria-pressed={filter === f}>
               {f === "all" ? "All" : SOURCE_LABEL[f]}
             </button>
           ))}
         </div>
+        <label className="search-field">
+          <Search size={16} />
+          <span className="sr-only">Filter memories</span>
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Filter by title…" />
+        </label>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[var(--muted)]">
-        <label className="flex items-center gap-2">
+      <div className="memory-options">
+        <label className="check-row">
           <input type="checkbox" checked={includeSample} disabled={busy === "sample"} onChange={(e) => toggleSample(e.target.checked)} />
           Include Maya’s sample data
         </label>
-        <label className="flex items-center gap-2">
+        <label className="check-row">
           <input type="checkbox" checked={showMoments} onChange={(e) => setShowMoments(e.target.checked)} />
           Show individual video moments
         </label>
-        <span>{visible.length} shown</span>
+        <span className="faint text-[13px]">{visible.length} shown</span>
         {hiddenCount > 0 && (
-          <button onClick={reset} disabled={busy === "reset"} className="text-[var(--accent)] hover:underline">
-            Restore {hiddenCount} deleted sample memor{hiddenCount === 1 ? "y" : "ies"}
+          <button onClick={reset} disabled={busy === "reset"} className="text-link inline-flex items-center gap-1.5 text-[13px]">
+            <RotateCcw size={13} /> Restore {hiddenCount} forgotten sample memor{hiddenCount === 1 ? "y" : "ies"}
           </button>
         )}
       </div>
 
-      <ul className="mt-5 grid gap-3">
-        {visible.map((m) => (
-          <li key={m.id} className="relative">
-            <SourceCard memory={m} />
-            <button
-              onClick={() => remove(m.id)}
-              disabled={busy === m.id}
-              className="absolute right-3 bottom-3 rounded-lg border border-[var(--border)] px-3 py-1 text-sm text-[var(--muted)] hover:border-red-400 hover:text-red-500 disabled:opacity-50"
-              aria-label={`Delete memory: ${m.title}`}
-            >
-              {busy === m.id ? "Deleting…" : "Delete"}
-            </button>
-          </li>
+      <section className="timeline" aria-label="Memory timeline">
+        {days.map(([day, items]) => (
+          <div key={day}>
+            <div className="timeline-day">
+              <span>{day}</span>
+              <small>
+                {items.length} activit{items.length === 1 ? "y" : "ies"}
+              </small>
+            </div>
+            {items.map((m) => {
+              const href = memoryHref(m);
+              const external = href.startsWith("http");
+              return (
+                <article className="memory-row" key={m.id}>
+                  <div className="time-column">{formatClockTime(m.occurredAt)}</div>
+                  <span className={`memory-type ${TYPE_CLASS[m.source]}`}>
+                    <SourceIcon source={m.source} size={17} />
+                  </span>
+                  <div className="memory-main">
+                    <h3>{m.title}</h3>
+                    {m.excerpt && m.excerpt !== m.title && <p>{m.excerpt}</p>}
+                    <div className="memory-meta">
+                      <span className="badge">{SOURCE_LABEL[m.source]}</span>
+                      {m.memoryType === "video_moment" && m.startSeconds !== undefined && (
+                        <span className="badge accent">Moment · {secondsToClock(m.startSeconds)}</span>
+                      )}
+                      <LanguageBadge language={m.language} />
+                      <span className="faint text-xs">{ORIGIN_LABEL[m.sourceMode]}</span>
+                    </div>
+                  </div>
+                  <div className="row-actions">
+                    {external ? (
+                      <a href={href} target="_blank" rel="noreferrer" aria-label={`Open ${m.title}`}>
+                        <ArrowUpRight size={17} />
+                      </a>
+                    ) : (
+                      <Link href={href} aria-label={`Open ${m.title}`}>
+                        <ArrowUpRight size={17} />
+                      </Link>
+                    )}
+                    <button aria-label={`Inspect evidence: ${m.title}`} onClick={() => openEvidence(m)}>
+                      <PanelRightOpen size={17} />
+                    </button>
+                    <button className="forget" aria-label={`Forget memory: ${m.title}`} disabled={busy === m.id} onClick={() => remove(m.id)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         ))}
-      </ul>
-      {!visible.length && <p className="mt-6 text-[var(--muted)]">No memories match.</p>}
+      </section>
+      {!visible.length && <p className="muted mt-6">No memories match.</p>}
 
-      <div className="mt-10 border-t border-[var(--border)] pt-4">
-        <button onClick={deleteOwn} disabled={busy === "delete-all"} className="text-sm text-red-500 hover:underline disabled:opacity-50">
-          {busy === "delete-all" ? "Deleting…" : "Delete my imported and captured data"}
+      <section className="panel danger-zone">
+        <div>
+          <h3>Delete my data</h3>
+          <p>Remove everything you imported or captured. Maya’s sample is not affected.</p>
+        </div>
+        <button onClick={deleteOwn} disabled={busy === "delete-all"} className="button danger">
+          <Trash2 size={15} /> {busy === "delete-all" ? "Deleting…" : "Delete all"}
         </button>
-      </div>
+      </section>
     </div>
   );
 }

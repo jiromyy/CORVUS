@@ -1,9 +1,12 @@
 "use client";
 
+import { Copy, Download, KeyRound, Pause, Search, Video } from "lucide-react";
 import { useState } from "react";
+import { useEvidence } from "./Evidence";
 
 /** Steps to install the Corvus Capture extension and a one-time pairing code for this workspace. */
 export function ExtensionConnect() {
+  const { notify } = useEvidence();
   const [pairing, setPairing] = useState<{ code: string; expiresAt: string } | { error: string } | undefined>();
   const [busy, setBusy] = useState(false);
 
@@ -18,45 +21,88 @@ export function ExtensionConnect() {
     setBusy(false);
   }
 
+  async function copy(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      notify("Pairing code copied");
+    } catch {
+      notify("Copy didn’t work. Type the code instead.");
+    }
+  }
+
   return (
-    <section aria-labelledby="ext-title" className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <h2 id="ext-title" className="text-lg font-semibold">
-        Capture automatically with the Chrome extension
-      </h2>
-      <p className="mt-1 text-sm text-[var(--muted)]">
-        From now on, YouTube videos you watch (after 30 seconds) and your Google searches go straight into your memory. Nothing
-        is captured on other sites, and you can pause it any time.
-      </p>
-      <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm">
-        <li>
-          <a href="/corvus-capture.zip" download className="text-[var(--accent)] hover:underline">
-            Download the extension
-          </a>{" "}
-          and unzip it.
-        </li>
-        <li>
-          Open <code>chrome://extensions</code>, turn on <b>Developer mode</b>, click <b>Load unpacked</b>, and choose the
-          unzipped folder.
-        </li>
-        <li>Click the Corvus icon in Chrome’s toolbar and enter this code:</li>
-      </ol>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button
-          onClick={getCode}
-          disabled={busy}
-          className="rounded-xl bg-[var(--accent)] px-4 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {pairing && "code" in pairing ? "New code" : "Get pairing code"}
-        </button>
+    <section id="extension" aria-labelledby="ext-title" className="two-col scroll-mt-24">
+      <div className="panel p-6">
+        <span className="badge accent">Automatic capture</span>
+        <h2 id="ext-title" className="mb-1 mt-3 text-[21px] tracking-tight">
+          Pair the Chrome extension
+        </h2>
+        <p className="muted m-0 text-[14px]">
+          From now on, YouTube videos you watch (after 30 seconds) and your Google searches go straight into your memory.
+        </p>
+        <ol className="steps mt-4">
+          <li>
+            <a href="/corvus-capture.zip" download className="text-link inline-flex items-center gap-1">
+              <Download size={14} /> Download the extension
+            </a>{" "}
+            and unzip it.
+          </li>
+          <li>
+            Open <code>chrome://extensions</code>, turn on <b>Developer mode</b>, click <b>Load unpacked</b>, and choose the unzipped folder.
+          </li>
+          <li>Click the Corvus icon in Chrome’s toolbar and enter this one-time code.</li>
+        </ol>
         {pairing && "code" in pairing && (
-          <span className="flex items-center gap-2">
-            <code className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-lg tracking-widest">{pairing.code}</code>
-            <span className="text-xs text-[var(--muted)]">
-              valid until {new Date(pairing.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}, one use
-            </span>
-          </span>
+          <>
+            <div className="pairing-code" aria-label={`Pairing code ${pairing.code}`}>
+              {pairing.code}
+            </div>
+            <p className="faint m-0 text-center text-[12.5px]">
+              Valid until {new Date(pairing.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · one use
+            </p>
+          </>
         )}
-        {pairing && "error" in pairing && <span className="text-sm text-red-500">{pairing.error}</span>}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button onClick={getCode} disabled={busy} className="button">
+            <KeyRound size={15} /> {pairing && "code" in pairing ? "New code" : "Get pairing code"}
+          </button>
+          {pairing && "code" in pairing && (
+            <button className="button secondary" onClick={() => copy(pairing.code)}>
+              <Copy size={15} /> Copy code
+            </button>
+          )}
+        </div>
+        {pairing && "error" in pairing && <p className="error-note mt-3">{pairing.error}</p>}
+      </div>
+      <div className="panel p-6">
+        <h3 className="m-0 mb-1 text-[15px]">What it captures</h3>
+        <div className="feature-row">
+          <span>
+            <Video size={17} />
+          </span>
+          <div>
+            <strong>YouTube watches</strong>
+            <p>After 30 seconds of playback, so a quick skim isn’t remembered.</p>
+          </div>
+        </div>
+        <div className="feature-row">
+          <span>
+            <Search size={17} />
+          </span>
+          <div>
+            <strong>Google searches</strong>
+            <p>The submitted query and the result you click. No keystrokes or page contents.</p>
+          </div>
+        </div>
+        <div className="feature-row">
+          <span>
+            <Pause size={17} />
+          </span>
+          <div>
+            <strong>You stay in control</strong>
+            <p>Nothing is captured on other sites. Pause from the popup; deleting your data also disconnects it.</p>
+          </div>
+        </div>
       </div>
     </section>
   );

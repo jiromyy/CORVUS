@@ -5,7 +5,7 @@ export const metadata = { title: "Watch — Corvus" };
 
 export default function WatchPage() {
   return (
-    <Suspense fallback={<p className="animate-pulse text-[var(--muted)]">Loading the moment…</p>}>
+    <Suspense fallback={<p className="loading-line">Loading the moment…</p>}>
       <WatchView />
     </Suspense>
   );

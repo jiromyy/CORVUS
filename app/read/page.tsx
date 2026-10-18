@@ -5,7 +5,7 @@ export const metadata = { title: "Read — Corvus" };
 
 export default function ReadPage() {
   return (
-    <Suspense fallback={<p className="animate-pulse text-[var(--muted)]">Loading…</p>}>
+    <Suspense fallback={<p className="loading-line">Loading…</p>}>
       <ReadView />
     </Suspense>
   );

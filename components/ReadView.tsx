@@ -31,34 +31,34 @@ export function ReadView() {
     if (content && target) document.getElementById(target)?.scrollIntoView({ block: "center" });
   }, [content, target]);
 
-  if (!contentId) return <p className="text-[var(--muted)]">No article selected.</p>;
-  if (content === undefined) return <p className="animate-pulse text-[var(--muted)]">Loading…</p>;
-  if (content === null) return <p className="text-[var(--muted)]">This article is unavailable.</p>;
+  if (!contentId) return <p className="muted">No article selected.</p>;
+  if (content === undefined) return <p className="loading-line">Loading…</p>;
+  if (content === null) return <p className="muted">This article is unavailable.</p>;
 
   return (
-    <article className="mx-auto max-w-2xl">
+    <article className="content-reading">
       <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
         <span>{content.creator}</span>
         {content.language && <LanguageBadge language={content.language} />}
       </div>
-      <h1 className="mt-2 text-2xl font-semibold leading-tight">{content.title}</h1>
-      <div className="mt-6 space-y-6">
+      <h1 className="mt-3 text-[34px] font-medium leading-tight tracking-[-0.035em]">{content.title}</h1>
+      <div className="mt-6 space-y-3">
         {(content.bodyChunks ?? []).map((chunk, n) => {
           const id = `chunk-${n}`;
           return (
             <section
               key={id}
               id={id}
-              className={`rounded-xl p-3 transition-colors ${target === id ? "bg-[var(--surface)] ring-1 ring-[var(--accent)]" : ""}`}
+              className={`article-chunk ${target === id ? "cited" : ""}`}
             >
               {chunk.heading && <h2 className="mb-1 font-semibold">{chunk.heading}</h2>}
-              <p className="leading-relaxed">{chunk.text}</p>
-              {target === id && <p className="mt-2 text-xs text-[var(--accent)]">Corvus cited this passage</p>}
+              <p className="m-0 text-[16px] leading-[1.75]">{chunk.text}</p>
+              {target === id && <span className="badge accent mt-3">Corvus cited this passage</span>}
             </section>
           );
         })}
       </div>
-      <Link href="/" className="mt-8 inline-block text-sm text-[var(--muted)] hover:underline">
+      <Link href="/" className="button ghost compact mt-8">
         ← Back to Ask
       </Link>
     </article>

@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertCircle, ArrowRight, Check, CheckCircle2, Clock3, FileArchive, Loader2, ShieldCheck, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { parseTakeoutFile, prepareImport, type ParsedFile, type TakeoutRecord } from "@/lib/takeout";
@@ -95,24 +96,32 @@ export function ImportView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {phase.step === "pick" && (
-        <>
-          <ol className="list-decimal space-y-2 pl-5 text-[var(--muted)]">
-            <li>Unzip your Google Takeout export.</li>
-            <li>
-              Pick these files (you can select several at once): <code>My Activity/Search/MyActivity.json</code>,{" "}
-              <code>My Activity/YouTube/MyActivity.json</code>, <code>YouTube and YouTube Music/history/watch-history.json</code>,
-              and optionally <code>Chrome/BrowserHistory.json</code>.
-            </li>
-            <li>Your browser reads them here. Only titles, links, times, and search text from the last 90 days are sent to Corvus.</li>
-          </ol>
-          <label className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-10 text-center hover:border-[var(--accent)]">
-            <span className="font-medium">Choose Takeout .json files</span>
-            <span className="text-sm text-[var(--muted)]">Nothing is uploaded until you confirm.</span>
+        <div className="two-col">
+          <label className="drop-zone">
+            <span className="upload-orb">
+              <UploadCloud size={26} />
+            </span>
+            <strong>Choose Takeout .json files</strong>
+            <span>You can select several at once. Nothing is uploaded until you confirm.</span>
             <input type="file" accept=".json,application/json" multiple className="sr-only" onChange={(e) => readFiles(e.target.files)} />
           </label>
-        </>
+          <div className="panel p-6">
+            <h3 className="m-0 mb-3 text-[15px]">Which files to pick</h3>
+            <ol className="steps">
+              <li>Unzip your Google Takeout export.</li>
+              <li>
+                Pick <code>My Activity/Search/MyActivity.json</code>, <code>My Activity/YouTube/MyActivity.json</code>,{" "}
+                <code>YouTube and YouTube Music/history/watch-history.json</code>, and optionally <code>Chrome/BrowserHistory.json</code>.
+              </li>
+              <li>Your browser reads them here. Only titles, links, times, and search text from the last 90 days are sent to Corvus.</li>
+            </ol>
+            <p className="mt-4 flex items-start gap-2 text-[13px] faint">
+              <ShieldCheck size={15} className="mt-0.5 shrink-0 text-[var(--success)]" /> Everything else in your files stays on this device.
+            </p>
+          </div>
+        </div>
       )}
 
       {phase.step === "preview" && (
@@ -129,35 +138,44 @@ export function ImportView() {
       )}
 
       {phase.step === "uploading" && (
-        <Progress label={`Remembering ${phase.done} of ${phase.total} items…`} value={phase.done / phase.total} />
+        <div className="panel p-6">
+          <Progress label={`Remembering ${phase.done} of ${phase.total} items…`} value={phase.done / phase.total} />
+        </div>
       )}
 
       {(phase.step === "analysing" || phase.step === "finished") && (
-        <div>
-          <p className="font-medium">
-            {phase.imported} items imported.{" "}
-            {phase.step === "analysing" ? "Now Gemini is watching your most recent videos so you can recall exact moments:" : "Done."}
-          </p>
-          <ul className="mt-3 space-y-2">
+        <div className="panel p-6">
+          <div className="flex items-start gap-4">
+            <span className="success-orb shrink-0">
+              {phase.step === "finished" ? <CheckCircle2 size={26} className="text-[var(--success)]" /> : <Loader2 size={26} className="spin" />}
+            </span>
+            <div>
+              <h2 className="serif m-0 text-[30px]">{phase.imported} items imported</h2>
+              <p className="muted mt-1">
+                {phase.step === "analysing" ? "Now Gemini is watching your most recent videos so you can recall exact moments." : "Done. Your memory is ready."}
+              </p>
+            </div>
+          </div>
+          <ul className="mt-4">
             {phase.jobs.map((j) => (
-              <li key={j.videoId} className="flex items-start gap-3 rounded-lg border border-[var(--border)] px-3 py-2 text-sm">
-                <span aria-hidden className="mt-0.5 w-4">
-                  {j.status === "done" ? "✓" : j.status === "analysing" ? "…" : j.status === "queued" ? "·" : "!"}
+              <li key={j.videoId} className="job-row">
+                <span className={j.status === "done" ? "done" : j.status === "analysing" ? "analysing" : j.status === "queued" ? "" : "failed"} aria-hidden>
+                  {j.status === "done" ? <Check size={15} /> : j.status === "analysing" ? <Loader2 size={15} className="spin" /> : j.status === "queued" ? <Clock3 size={15} /> : <AlertCircle size={15} />}
                 </span>
-                <span className="flex-1">
+                <span>
                   {j.title}
-                  {j.detail && <span className="block text-[var(--muted)]">{j.detail}</span>}
-                  {j.status === "analysing" && <span className="block animate-pulse text-[var(--muted)]">Analysing (30–100 s)…</span>}
+                  {j.detail && <small>{j.detail}</small>}
+                  {j.status === "analysing" && <small className="loading-line">Analysing (30–100 s)…</small>}
                 </span>
               </li>
             ))}
           </ul>
           {phase.step === "finished" && (
-            <div className="mt-5 flex gap-4">
-              <Link href="/" className="rounded-xl bg-[var(--accent)] px-5 py-2.5 font-medium text-white">
-                Ask about your activity
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/" className="button">
+                Ask about your activity <ArrowRight size={15} />
               </Link>
-              <Link href="/library" className="px-2 py-2.5 text-[var(--muted)] hover:underline">
+              <Link href="/library" className="button secondary">
                 See your memory
               </Link>
             </div>
@@ -166,11 +184,14 @@ export function ImportView() {
       )}
 
       {phase.step === "error" && (
-        <div className="rounded-xl border border-red-400/50 p-4">
-          <p>{phase.message}</p>
-          <button onClick={() => setPhase({ step: "pick" })} className="mt-2 text-sm text-[var(--accent)] hover:underline">
-            Start again
-          </button>
+        <div className="error-note">
+          <AlertCircle size={17} />
+          <div>
+            <p className="m-0">{phase.message}</p>
+            <button onClick={() => setPhase({ step: "pick" })} className="text-link mt-2 text-sm">
+              Start again
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -193,38 +214,44 @@ function Preview({
   const count = (k: TakeoutRecord["kind"]) => phase.records.filter((r) => r.kind === k).length;
   const hasBrowser = phase.files.some((f) => f.kind === "browser-history");
   return (
-    <div className="space-y-4">
-      <ul className="space-y-1 text-sm">
-        {phase.files.map((f) => (
-          <li key={f.name}>
-            <span className="font-medium">{f.name}</span> — {KIND_LABEL[f.kind]} ({f.records.length} items)
-          </li>
-        ))}
-      </ul>
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-        <p className="font-medium">Ready to remember from the last 90 days:</p>
-        <p className="mt-1 text-[var(--muted)]">
-          {count("watched")} videos watched · {count("searched")} searches · {count("visited")} pages visited
-        </p>
-        <p className="mt-3 text-sm text-[var(--muted)]">
-          Sent to Corvus: title, link, time, search text, channel name. Everything else in your files stays on this device.
-        </p>
-        {hasBrowser && (
-          <label className="mt-3 flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={includeVisited} onChange={(e) => onToggleVisited(e.target.checked)} />
-            Include pages visited (latest 300)
-          </label>
-        )}
+    <div className="panel p-6">
+      <div className="flex items-center gap-3">
+        <span className="upload-orb m-0! h-12! w-12!">
+          <FileArchive size={22} />
+        </span>
+        <div>
+          <h2 className="m-0 text-[17px]">Ready to remember from the last 90 days</h2>
+          <p className="faint m-0 mt-1 text-[13px]">
+            {phase.files.map((f) => `${f.name} (${KIND_LABEL[f.kind]}, ${f.records.length})`).join(" · ")}
+          </p>
+        </div>
       </div>
-      <div className="flex gap-3">
-        <button
-          onClick={onConfirm}
-          disabled={!phase.records.length}
-          className="rounded-xl bg-[var(--accent)] px-5 py-2.5 font-medium text-white disabled:opacity-50"
-        >
+      <div className="stat-grid">
+        <div className="metric">
+          <span>Videos watched</span>
+          <strong>{count("watched")}</strong>
+        </div>
+        <div className="metric">
+          <span>Searches</span>
+          <strong>{count("searched")}</strong>
+        </div>
+        <div className="metric">
+          <span>Pages visited</span>
+          <strong>{count("visited")}</strong>
+        </div>
+      </div>
+      <p className="muted text-[13.5px]">Sent to Corvus: title, link, time, search text, channel name. Everything else in your files stays on this device.</p>
+      {hasBrowser && (
+        <label className="check-row mt-3">
+          <input type="checkbox" checked={includeVisited} onChange={(e) => onToggleVisited(e.target.checked)} />
+          Include pages visited (latest 300)
+        </label>
+      )}
+      <div className="mt-5 flex flex-wrap gap-3">
+        <button onClick={onConfirm} disabled={!phase.records.length} className="button">
           Import {phase.records.length} items
         </button>
-        <button onClick={onCancel} className="px-3 py-2.5 text-[var(--muted)] hover:underline">
+        <button onClick={onCancel} className="button ghost">
           Cancel
         </button>
       </div>
@@ -235,9 +262,9 @@ function Preview({
 function Progress({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <p className="mb-2">{label}</p>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface)]" role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
-        <div className="h-full bg-[var(--accent)] transition-all" style={{ width: `${Math.round(value * 100)}%` }} />
+      <p className="mb-3 mt-0 font-medium">{label}</p>
+      <div className="progress-track" role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
+        <div style={{ width: `${Math.round(value * 100)}%` }} />
       </div>
     </div>
   );

@@ -1,53 +1,75 @@
+"use client";
+
+import { ArrowRight, ExternalLink, PanelRightOpen, Play } from "lucide-react";
 import Link from "next/link";
 import type { SourceCard as SourceCardData } from "@/lib/agent/run";
 import { secondsToClock } from "@/lib/time";
-import { LanguageBadge, SOURCE_LABEL, SourceIcon, formatSeen } from "./ui";
+import { thumbnailUrl } from "@/lib/youtube";
+import { useEvidence } from "./Evidence";
+import { LanguageBadge, SOURCE_LABEL, SourceIcon, formatSeen, memoryHref, videoIdOf } from "./ui";
 
-/** Where "Open" goes: our own viewer for videos and articles, Google for searches. */
-export function openHref(m: Pick<SourceCardData, "id" | "source" | "deepLink" | "memoryType">) {
-  if (m.source === "youtube") return `/watch?m=${encodeURIComponent(m.id)}`;
-  return m.deepLink;
-}
+const TILE_CLASS = { youtube: "", google_search: "search", web: "web" } as const;
 
-export function SourceCard({ memory, index }: { memory: SourceCardData; index?: number }) {
+/** A cited memory: thumbnail or source icon, what it says, and actions to open it or inspect the evidence. */
+export function SourceCard({ memory, index, claim }: { memory: SourceCardData; index?: number; claim?: string }) {
+  const { openEvidence } = useEvidence();
   const isMoment = memory.memoryType === "video_moment" && memory.startSeconds !== undefined;
-  const href = openHref(memory);
+  const href = memoryHref(memory);
   const external = href.startsWith("http");
   const action = isMoment ? `Open at ${secondsToClock(memory.startSeconds!)}` : memory.source === "google_search" ? "Search again" : "Open";
+  const videoId = memory.source === "youtube" ? videoIdOf(memory) : undefined;
 
   return (
-    <article className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
-        {index !== undefined && (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--accent)] text-[10px] font-semibold text-white">
-            {index + 1}
+    <article className="source-card">
+      {videoId ? (
+        <Link
+          href={href}
+          className="source-thumb"
+          style={{ backgroundImage: `linear-gradient(90deg, rgba(9,8,13,.05), rgba(9,8,13,.32)), url(${thumbnailUrl(videoId)})` }}
+          aria-label={action}
+        >
+          <span className="play-orb">
+            <Play size={16} fill="currentColor" />
           </span>
-        )}
-        <SourceIcon source={memory.source} />
-        <span>{SOURCE_LABEL[memory.source]}</span>
-        <span aria-hidden>·</span>
-        <span>Seen {formatSeen(memory.occurredAt)}</span>
-        <LanguageBadge language={memory.language} />
-        {memory.sourceMode === "demo_seed" && <span className="ml-auto">Sample</span>}
-      </div>
-      <h3 className="mt-2 font-medium leading-snug">{memory.title}</h3>
-      <p className="mt-1 text-sm text-[var(--muted)]">{memory.excerpt}</p>
-      {memory.visualDescription && (
-        <p className="mt-2 text-sm">
-          <span className="font-medium">On screen: </span>
-          <span className="text-[var(--muted)]">{memory.visualDescription}</span>
-        </p>
+          {isMoment && <span className="time">{secondsToClock(memory.startSeconds!)}</span>}
+        </Link>
+      ) : (
+        <span className={`source-icon-tile ${TILE_CLASS[memory.source]}`} aria-hidden>
+          <SourceIcon source={memory.source} size={21} />
+        </span>
       )}
-      <div className="mt-3">
-        {external ? (
-          <a href={href} target="_blank" rel="noreferrer" className="text-sm font-medium text-[var(--accent)] hover:underline">
-            {action} ↗
-          </a>
-        ) : (
-          <Link href={href} className="text-sm font-medium text-[var(--accent)] hover:underline">
-            {action} →
-          </Link>
+      <div className="source-body">
+        <div className="source-meta">
+          {index !== undefined && <span className="cite-num">{index + 1}</span>}
+          <span>{SOURCE_LABEL[memory.source]}</span>
+          <span aria-hidden>·</span>
+          <span>Seen {formatSeen(memory.occurredAt)}</span>
+          <LanguageBadge language={memory.language} />
+          {isMoment && <span className="badge accent">Video moment</span>}
+          {memory.sourceMode === "demo_seed" && <span className="badge">Sample</span>}
+        </div>
+        <h3>{memory.title}</h3>
+        {memory.excerpt && memory.excerpt !== memory.title && <p>{memory.excerpt}</p>}
+        {memory.visualDescription && (
+          <p className="on-screen">
+            <b>On screen: </b>
+            {memory.visualDescription}
+          </p>
         )}
+        <div className="source-actions">
+          {external ? (
+            <a href={href} target="_blank" rel="noreferrer" className="button compact">
+              {action} <ExternalLink size={14} />
+            </a>
+          ) : (
+            <Link href={href} className="button compact">
+              {isMoment ? <Play size={14} fill="currentColor" /> : null} {action} {!isMoment && <ArrowRight size={14} />}
+            </Link>
+          )}
+          <button className="button secondary compact" onClick={() => openEvidence({ ...memory, claim })}>
+            <PanelRightOpen size={14} /> View evidence
+          </button>
+        </div>
       </div>
     </article>
   );

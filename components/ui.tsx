@@ -1,5 +1,8 @@
-/** Small shared UI pieces: source icons, badges, date formatting. Server- and client-safe. */
+/** Small shared UI pieces: source icons, badges, date formatting, links. Server- and client-safe. */
+import { FileText, Search, Video } from "lucide-react";
 import type { SourceKind } from "@/lib/ai/schemas";
+import type { MemoryView } from "@/lib/db/store";
+import { parseYouTubeId } from "@/lib/youtube";
 
 export const SOURCE_LABEL: Record<SourceKind, string> = {
   youtube: "YouTube",
@@ -7,28 +10,11 @@ export const SOURCE_LABEL: Record<SourceKind, string> = {
   web: "Article",
 };
 
-export function SourceIcon({ source, className = "h-4 w-4" }: { source: SourceKind; className?: string }) {
-  const common = { className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, "aria-hidden": true } as const;
-  if (source === "youtube")
-    return (
-      <svg {...common}>
-        <rect x="2.5" y="5" width="19" height="14" rx="4" />
-        <path d="M10 9.5v5l4.5-2.5z" fill="currentColor" stroke="none" />
-      </svg>
-    );
-  if (source === "google_search")
-    return (
-      <svg {...common}>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="m16 16 4.5 4.5" strokeLinecap="round" />
-      </svg>
-    );
-  return (
-    <svg {...common}>
-      <path d="M6 3h8l4 4v14H6z" strokeLinejoin="round" />
-      <path d="M9 12h6M9 16h6M9 8h3" strokeLinecap="round" />
-    </svg>
-  );
+const SOURCE_ICON = { youtube: Video, google_search: Search, web: FileText } as const;
+
+export function SourceIcon({ source, size = 16, className }: { source: SourceKind; size?: number; className?: string }) {
+  const Icon = SOURCE_ICON[source];
+  return <Icon size={size} className={className} aria-hidden />;
 }
 
 const LANGUAGE_NAME: Record<string, string> = { en: "English", fil: "Filipino", tl: "Filipino" };
@@ -36,7 +22,7 @@ const LANGUAGE_NAME: Record<string, string> = { en: "English", fil: "Filipino", 
 export function LanguageBadge({ language }: { language: string }) {
   const name = LANGUAGE_NAME[language] ?? language.toUpperCase();
   return (
-    <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--muted)]" title={`Language: ${name}`}>
+    <span className="badge" title={`Language: ${name}`}>
       {name}
     </span>
   );
@@ -46,11 +32,17 @@ export function formatSeen(iso: string) {
   return new Intl.DateTimeFormat("en-PH", { month: "short", day: "numeric", timeZone: "Asia/Manila" }).format(new Date(iso));
 }
 
-export function SampleDataNotice() {
-  return (
-    <p className="text-xs text-[var(--muted)]">
-      Sample history for “Maya”, built from public YouTube videos. Corvus does not connect to your Google account. Corvus is
-      a hackathon concept and is not a Google product.
-    </p>
-  );
+export function formatClockTime(iso: string) {
+  return new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Manila" }).format(new Date(iso));
+}
+
+/** Where "Open" goes: our own viewer for videos and articles, Google for searches. */
+export function memoryHref(m: Pick<MemoryView, "id" | "source" | "deepLink">) {
+  if (m.source === "youtube") return `/watch?m=${encodeURIComponent(m.id)}`;
+  return m.deepLink;
+}
+
+export function videoIdOf(m: Partial<Pick<MemoryView, "contentId" | "deepLink">>) {
+  if (m.contentId?.startsWith("yt_")) return m.contentId.slice(3);
+  return m.deepLink ? parseYouTubeId(m.deepLink) : undefined;
 }
