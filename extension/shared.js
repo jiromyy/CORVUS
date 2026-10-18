@@ -44,6 +44,7 @@ export function pageKind(url) {
     return "none";
   }
   if (!/^https?:$/.test(u.protocol)) return "none";
+  if (Object.values(SERVERS).some((base) => new URL(base).host === u.host)) return "corvus"; // Corvus itself
   if (/(^|\.)youtube\.com$/.test(u.hostname)) return youtubeId(url) ? "video" : "youtube";
   if (/^www\.google\.(com|com\.ph)$/.test(u.hostname) && u.pathname === "/search") return "search";
   if (/(^|\.)google\.[a-z.]+$/.test(u.hostname)) return "google";

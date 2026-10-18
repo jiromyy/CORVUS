@@ -152,6 +152,7 @@ use[href="#i-more"] { fill: currentColor; }
 .btn {
   height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border-strong);
   background: var(--surface-2); color: var(--text-1); font-size: 12px; font-weight: 500; white-space: nowrap;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis;
 }
 .btn:hover { border-color: var(--text-3); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
@@ -184,7 +185,7 @@ use[href="#i-more"] { fill: currentColor; }
 
 /* Ask */
 .ask { display: flex; flex-direction: column; }
-.ask-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 12px 8px; display: flex; flex-direction: column; gap: 12px; scrollbar-width: thin; }
+.ask-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 14px 12px 8px; display: flex; flex-direction: column; gap: 12px; scrollbar-width: thin; }
 
 .context { display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 10px; }
 .context .thumb { width: 68px; height: 40px; flex: none; border-radius: 8px; object-fit: cover; background: var(--surface-3); }
@@ -193,6 +194,8 @@ use[href="#i-more"] { fill: currentColor; }
 .context .title { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .context .sub { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; }
 .context .remove { width: 30px; height: 30px; }
+.context .sub > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.context .sub > .site-chip { flex: none; }
 .context.off { opacity: 0.7; border-style: dashed; }
 .context.off .label { color: var(--text-3); }
 
@@ -219,7 +222,7 @@ use[href="#i-more"] { fill: currentColor; }
 .remember .tile .i { width: 16px; height: 16px; }
 .remember h3 { margin: 0; font-size: 13px; font-weight: 600; }
 .remember p { margin: 2px 0 10px; font-size: 11.5px; color: var(--text-3); }
-.remember .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.remember .actions { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
 .remember.done { align-items: center; padding: 10px 14px; background: var(--surface-1); border-color: var(--border-strong); }
 .remember.done p { margin: 0; color: var(--text-2); }
 .remember.done .tile { background: color-mix(in srgb, var(--st-remembered) 16%, transparent); color: var(--st-remembered); }

@@ -80,7 +80,7 @@ function context() {
   const tab = state.tab;
   if (!tab?.url) return null;
   const kind = pageKind(tab.url);
-  if (kind === "none") return null;
+  if (kind === "none" || kind === "corvus") return null;
   if (kind === "video") {
     const id = youtubeId(tab.url);
     const v = state.video?.videoId === id ? state.video : null;
@@ -198,7 +198,7 @@ function renderRemember() {
           : "Corvus currently has one-time access to this page. Automatic memory requires your permission.")),
         h("div", { class: "actions" },
           done === "once" ? null : h("button", { type: "button", class: "btn", onclick: (e) => rememberOnce(e.currentTarget) }, "Remember once"),
-          h("button", { type: "button", class: "btn primary", onclick: (e) => rememberAlways(e.currentTarget) }, `Always remember ${ctx.domain}`),
+          h("button", { type: "button", class: "btn primary", title: `Always remember ${ctx.domain}`, onclick: (e) => rememberAlways(e.currentTarget) }, `Always remember ${ctx.domain}`),
         ),
       ),
       h("button", { type: "button", class: "icon-btn", "aria-label": "Not now", style: "width:26px;height:26px;margin:-6px -6px 0 0", onclick: () => { state.dismissed.add(ctx.domain); render(); } }, icon("i-x")),
