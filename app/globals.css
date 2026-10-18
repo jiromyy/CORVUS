@@ -725,3 +725,13 @@ button.lyric-line:hover { opacity: .78; color: var(--text-2); }
 .empty-memory h2 { margin: 0 0 6px; font-size: 17px; }
 .empty-memory p { margin: 0 0 14px; color: var(--text-2); font-size: 14px; line-height: 1.6; }
 @media (max-width: 600px) { .composer-hint { display: none; } }
+
+/* ---------- extension connection ---------- */
+.capture-dot.unpaired, .capture-dot.loading { background: var(--text-3); box-shadow: 0 0 0 4px var(--surface-3); }
+.capture-dot.offline { background: var(--warning); box-shadow: 0 0 0 4px var(--warning-wash); }
+.capture-dot.on { animation: dot-live 2.4s ease-in-out infinite; }
+.connection-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px !important; font-size: 12.5px; font-weight: 600; }
+.connection-line.success { color: var(--success) !important; }
+.connection-line.warning { color: var(--warning) !important; }
+.connection-line.neutral { color: var(--text-2) !important; }
+@keyframes dot-live { 50% { box-shadow: 0 0 0 7px var(--success-wash); } }

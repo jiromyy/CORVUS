@@ -37,20 +37,62 @@ export function useCaptureSettings() {
   return { settings, update };
 }
 
+type ExtensionStatus = { paired: number; lastSeenAt: string | null; connected: boolean };
+
+/** Whether the browser extension is paired and checking in; refreshed every minute. */
+export function useExtensionStatus() {
+  const [status, setStatus] = useState<ExtensionStatus | undefined>();
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      fetch("/api/extension/status")
+        .then((r) => (r.ok ? r.json() : undefined))
+        .catch(() => undefined)
+        .then((s) => !cancelled && s && setStatus(s));
+    load();
+    const id = window.setInterval(load, 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+  return status;
+}
+
+export function seenAgo(iso: string | null) {
+  if (!iso) return "never";
+  const m = Math.round((Date.now() - Date.parse(iso)) / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  if (m < 1440) return `${Math.round(m / 60)}h ago`;
+  return `${Math.round(m / 1440)}d ago`;
+}
+
 /** Sidebar status card with a one-click pause. */
 export function CaptureCard({ onNavigate }: { onNavigate: () => void }) {
   const { settings, update } = useCaptureSettings();
   const { notify } = useEvidence();
+  const ext = useExtensionStatus();
   const paused = settings?.paused ?? false;
   const sources = [settings?.youtube !== false && "YouTube", settings?.search !== false && "Search", settings?.domains.length && `${settings.domains.length} site${settings.domains.length > 1 ? "s" : ""}`]
     .filter(Boolean)
     .join(" + ");
+  // Only claim capture is on when an extension is actually paired and checking in.
+  const state = !ext ? "loading" : !ext.paired ? "unpaired" : paused ? "paused" : !ext.connected ? "offline" : "on";
+  const title = { loading: "Checking capture…", unpaired: "Extension not connected", paused: "Capture is paused", offline: "Extension offline", on: "Capture is on" }[state];
+  const detail = {
+    loading: "",
+    unpaired: "Pair it to remember new activity",
+    paused: "Nothing new is remembered",
+    offline: `Last seen ${seenAgo(ext?.lastSeenAt ?? null)}`,
+    on: sources || "No sources enabled",
+  }[state];
   return (
     <div className="capture-card">
-      <span className={`capture-dot ${paused ? "paused" : ""}`} />
-      <Link href="/settings#capture" onClick={onNavigate} className="min-w-0 flex-1">
-        <strong>{paused ? "Capture is paused" : "Capture is on"}</strong>
-        <span>{paused ? "Nothing new is remembered" : sources || "No sources enabled"}</span>
+      <span className={`capture-dot ${state}`} />
+      <Link href={state === "unpaired" ? "/extension" : "/settings#capture"} onClick={onNavigate} className="min-w-0 flex-1">
+        <strong>{title}</strong>
+        <span>{detail}</span>
       </Link>
       <button
         className="icon-button compact"
@@ -71,6 +113,7 @@ export function CaptureCard({ onNavigate }: { onNavigate: () => void }) {
 /** Settings: global pause, capture by site, and automatically remembered websites. */
 export function CaptureControls() {
   const { settings, update } = useCaptureSettings();
+  const ext = useExtensionStatus();
   const { notify } = useEvidence();
   const [domain, setDomain] = useState("");
 
@@ -87,6 +130,13 @@ export function CaptureControls() {
   }
 
   const enabled = [settings.youtube && "YouTube", settings.search && "Search"].filter(Boolean).join(" and ");
+  const connection = !ext
+    ? undefined
+    : !ext.paired
+      ? { tone: "neutral", text: "No browser extension is paired, so nothing new is captured yet." }
+      : ext.connected
+        ? { tone: "success", text: `Extension connected · last check-in ${seenAgo(ext.lastSeenAt)}` }
+        : { tone: "warning", text: `Extension offline · last check-in ${seenAgo(ext.lastSeenAt)}. Open Chrome with the extension to resume.` };
   return (
     <div id="capture" className="scroll-mt-24">
       <section className={`capture-status ${settings.paused ? "paused" : ""}`}>
@@ -97,6 +147,16 @@ export function CaptureControls() {
           <span className={`badge ${settings.paused ? "warning" : "success"}`}>{settings.paused ? "Capture paused" : "Capture active"}</span>
           <h2>{settings.paused ? "Nothing new is being remembered" : enabled ? `${enabled} ${settings.youtube && settings.search ? "are" : "is"} enabled` : "All sources are off"}</h2>
           <p>Incognito tabs, keystrokes, cookies, forms, and private page contents are never captured.</p>
+          {connection && (
+            <p className={`connection-line ${connection.tone}`}>
+              <Laptop size={13} /> {connection.text}
+              {!ext?.paired && (
+                <Link href="/extension" className="text-link ml-1">
+                  Pair it
+                </Link>
+              )}
+            </p>
+          )}
         </div>
         <button className="button secondary" onClick={() => update({ paused: !settings.paused })}>
           {settings.paused ? <Play size={15} /> : <Pause size={15} />} {settings.paused ? "Resume" : "Pause all"}

@@ -3,13 +3,14 @@
 import { ArrowRight, FileArchive, Laptop, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { seenAgo } from "./CaptureControls";
 import { formatSeen } from "./ui";
 
 type Summary = { videos: number; searches: number; pages: number; moments: number; latest: string | null };
 type Sources = {
   sample: Summary & { included: boolean; signedIn: boolean; hidden: number };
   takeout: Summary;
-  extension: Summary & { pairedBrowsers: number };
+  extension: Summary & { paired: number; connected: boolean; lastSeenAt: string | null };
 };
 
 const total = (s: Summary) => s.videos + s.searches + s.pages;
@@ -79,13 +80,14 @@ export function SourcesView() {
           <SourceTile
             icon={Laptop}
             title="Chrome extension"
-            status={data.extension.pairedBrowsers ? `${data.extension.pairedBrowsers} browser${data.extension.pairedBrowsers > 1 ? "s" : ""} paired` : "Not paired"}
-            tone={data.extension.pairedBrowsers ? "success" : "neutral"}
+            status={!data.extension.paired ? "Not paired" : data.extension.connected ? "Connected" : "Offline"}
+            tone={data.extension.connected ? "success" : "neutral"}
+            note={data.extension.paired ? `${data.extension.paired} browser${data.extension.paired > 1 ? "s" : ""} paired · last check-in ${seenAgo(data.extension.lastSeenAt)}` : undefined}
             summary={data.extension}
             description="Captures new YouTube watches (after 30 seconds) and Google searches from now on. Nothing on other sites; pause any time from the popup."
             actions={
               <Link href="/import#extension" className="button compact">
-                {data.extension.pairedBrowsers ? "Pair another browser" : "Pair the extension"} <ArrowRight size={14} />
+                {data.extension.paired ? "Pair another browser" : "Pair the extension"} <ArrowRight size={14} />
               </Link>
             }
           />

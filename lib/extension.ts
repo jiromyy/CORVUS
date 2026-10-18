@@ -32,14 +32,29 @@ export async function exchangePairingCode(input: string): Promise<string | undef
   const { workspaceId, expiresAt } = snap.data() as { workspaceId: string; expiresAt: string };
   if (Date.parse(expiresAt) < Date.now()) return undefined;
   const token = randomBytes(32).toString("base64url");
-  await db.collection(TOKENS).doc(sha256(token)).set({ workspaceId, createdAt: new Date().toISOString() });
+  const now = new Date().toISOString();
+  await db.collection(TOKENS).doc(sha256(token)).set({ workspaceId, createdAt: now, lastSeenAt: now });
   return token;
 }
 
+/** Heartbeats are written at most once a minute per browser. */
+const SEEN_EVERY_MS = 60_000;
+/** A paired browser that hasn't checked in for this long is shown as offline. */
+export const ONLINE_WITHIN_MS = 15 * 60_000;
+
+type TokenDoc = { workspaceId: string; createdAt: string; lastSeenAt?: string };
+
+/** The workspace for an extension token; every authenticated call also counts as a heartbeat. */
 export async function workspaceForToken(token: string | undefined): Promise<string | undefined> {
   if (!token || token.length < 40) return undefined;
-  const snap = await getDb().collection(TOKENS).doc(sha256(token)).get();
-  return snap.exists ? (snap.data() as { workspaceId: string }).workspaceId : undefined;
+  const ref = getDb().collection(TOKENS).doc(sha256(token));
+  const snap = await ref.get();
+  if (!snap.exists) return undefined;
+  const doc = snap.data() as TokenDoc;
+  if (!doc.lastSeenAt || Date.now() - Date.parse(doc.lastSeenAt) > SEEN_EVERY_MS) {
+    await ref.set({ lastSeenAt: new Date().toISOString() }, { merge: true }).catch(() => undefined);
+  }
+  return doc.workspaceId;
 }
 
 export const bearer = (request: Request) => /^Bearer\s+(.+)$/i.exec(request.headers.get("authorization") ?? "")?.[1];
@@ -51,8 +66,12 @@ export async function workspaceFromRequest(request: Request): Promise<string | u
   return (await getScope()).ws.id;
 }
 
-/** How many browsers are paired to a workspace (tokens are only ever stored hashed). */
-export async function pairedBrowsers(workspaceId: string) {
-  const snap = await getDb().collection(TOKENS).where("workspaceId", "==", workspaceId).count().get();
-  return snap.data().count;
+export type ExtensionStatus = { paired: number; lastSeenAt: string | null; connected: boolean };
+
+/** Paired browsers for a workspace and when any of them last checked in (tokens are only ever stored hashed). */
+export async function extensionStatus(workspaceId: string): Promise<ExtensionStatus> {
+  const snap = await getDb().collection(TOKENS).where("workspaceId", "==", workspaceId).get();
+  const seen = snap.docs.map((d) => (d.data() as TokenDoc).lastSeenAt ?? (d.data() as TokenDoc).createdAt).sort();
+  const lastSeenAt = seen.at(-1) ?? null;
+  return { paired: snap.size, lastSeenAt, connected: Boolean(lastSeenAt && Date.now() - Date.parse(lastSeenAt) < ONLINE_WITHIN_MS) };
 }
