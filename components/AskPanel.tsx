@@ -3,6 +3,7 @@
 import { AlertCircle, ArrowRight, ArrowUp, Bug, Calculator, CheckCircle2, ChevronDown, Download, History, Sparkles, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { AskResult } from "@/lib/agent/run";
+import { Mark } from "./Brand";
 import { NEW_CONVERSATION_EVENT } from "./shell/events";
 import { SourceCard } from "./SourceCard";
 import { SpeakButton } from "./SpeakButton";
@@ -91,8 +92,7 @@ export function AskPanel() {
     return (
       <section aria-label="Ask Corvus" className="home-hero">
         <div className="hero-mark-wrap">
-          {/* eslint-disable-next-line @next/next/no-img-element -- static SVG mark */}
-          <img src="/brand/Icon.svg" className="hero-mark brand-accent" alt="" />
+          <Mark className="hero-mark brand-accent" />
         </div>
         <div className="hero-copy">
           <span className="eyebrow">Your media memory</span>
@@ -122,8 +122,7 @@ export function AskPanel() {
       <div className="user-message">{state.question}</div>
       <div className="assistant-message" aria-live="polite">
         <div className="assistant-avatar">
-          {/* eslint-disable-next-line @next/next/no-img-element -- static SVG mark */}
-          <img src="/brand/Icon.svg" className="brand-accent" alt="" />
+          <Mark className="brand-accent" />
         </div>
         <div className="answer-body">
           {state.status === "loading" && (

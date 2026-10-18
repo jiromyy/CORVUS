@@ -94,11 +94,12 @@ code { font-size: .92em; padding: 1px 5px; border-radius: 6px; background: var(-
 }
 .grain { position: fixed; inset: 0; opacity: .025; pointer-events: none; z-index: 1; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.72'/%3E%3C/svg%3E"); }
 
-/* Brand artwork is dark grey; recolour it per theme with filters. */
-.brand-ink { filter: brightness(0); opacity: .92; }
-:root[data-theme="dark"] .brand-ink { filter: brightness(0) invert(1); }
-.brand-accent { filter: brightness(0) saturate(100%) invert(40%) sepia(67%) saturate(1500%) hue-rotate(230deg); }
-:root[data-theme="dark"] .brand-accent { filter: brightness(0) invert(1); opacity: .92; }
+/* Brand artwork (components/Brand.tsx): the body follows `color`, the wordmark's eye follows --brand-eye. */
+:root { --brand-ink: #404040; --brand-eye: #ffffff; }
+:root[data-theme="dark"] { --brand-ink: #f5f2f7; --brand-eye: #121017; }
+.brand-ink { color: var(--brand-ink); }
+.brand-accent { color: var(--accent-soft); }
+:root[data-theme="dark"] .brand-accent { color: var(--text-1); }
 
 /* ---------- shell ---------- */
 .app-shell { min-height: 100vh; position: relative; z-index: 2; display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); }
@@ -224,7 +225,7 @@ code { font-size: .92em; padding: 1px 5px; border-radius: 6px; background: var(-
 .user-message { width: fit-content; max-width: 650px; margin-left: auto; padding: 12px 16px; border-radius: 16px; border-bottom-right-radius: 5px; background: var(--surface-3); border: 1px solid var(--border); font-size: 15px; line-height: 1.6; animation: item-rise 300ms ease-out both; }
 .assistant-message { margin-top: 28px; display: grid; grid-template-columns: 32px 1fr; gap: 15px; animation: item-rise 360ms ease-out both; }
 .assistant-avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 11px; background: var(--accent-wash); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); }
-.assistant-avatar img { width: 19px; height: auto; }
+.assistant-avatar svg { width: 19px; height: auto; }
 .answer-body { min-width: 0; }
 .agent-trace { color: var(--text-3); font-size: 12.5px; margin: 6px 0 12px; }
 .agent-trace summary { width: fit-content; display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; }
@@ -489,7 +490,7 @@ button.lyric-line:hover { opacity: .78; color: var(--text-2); }
   .prompt-grid { grid-template-columns: 1fr; }
   .assistant-message { grid-template-columns: 26px 1fr; gap: 10px; }
   .assistant-avatar { width: 26px; height: 26px; }
-  .assistant-avatar img { width: 15px; }
+  .assistant-avatar svg { width: 15px; }
   .source-card { grid-template-columns: 1fr; }
   .source-thumb { width: 100%; min-height: 0; aspect-ratio: 16 / 7; }
   .source-icon-tile { display: none; }

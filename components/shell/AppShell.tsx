@@ -4,6 +4,7 @@ import { Brain, Import, Laptop, Menu, MessageSquare, Moon, Plus, Podcast, Sun, X
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { Wordmark } from "../Brand";
 import { EvidenceProvider } from "../Evidence";
 import { NEW_CONVERSATION_EVENT } from "./events";
 
@@ -70,8 +71,7 @@ function Sidebar({ pathname, open, onClose }: { pathname: string; open: boolean;
       <aside className={`sidebar ${open ? "open" : ""}`} aria-label="Primary navigation">
         <div className="brand-row">
           <Link href="/" onClick={onClose} aria-label="Corvus home">
-            {/* eslint-disable-next-line @next/next/no-img-element -- static SVG wordmark, recoloured with CSS filters */}
-            <img className="brand-wordmark brand-ink" src="/brand/Icon_Full.svg" alt="Corvus" />
+            <Wordmark className="brand-wordmark brand-ink" />
           </Link>
           <button className="icon-button sidebar-close" aria-label="Close navigation" onClick={onClose}>
             <X size={18} />
