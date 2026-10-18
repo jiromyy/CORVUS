@@ -50,7 +50,7 @@ export function ExtensionConnect() {
           <li>
             Open <code>chrome://extensions</code>, turn on <b>Developer mode</b>, click <b>Load unpacked</b>, and choose the unzipped folder.
           </li>
-          <li>Click the Corvus icon in Chrome’s toolbar and enter this one-time code.</li>
+          <li>Click the Corvus bird in Chrome’s toolbar to open the side panel, and enter this one-time code.</li>
         </ol>
         {pairing && "code" in pairing && (
           <>
@@ -100,7 +100,7 @@ export function ExtensionConnect() {
           </span>
           <div>
             <strong>You stay in control</strong>
-            <p>Nothing is captured on other sites. Pause from the popup; deleting your data also disconnects it.</p>
+            <p>Other sites are remembered only when you choose “Remember once” or “Always remember” in the side panel. Pause any time; deleting your data also disconnects it.</p>
           </div>
         </div>
       </div>

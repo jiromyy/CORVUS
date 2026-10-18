@@ -51,11 +51,12 @@ The first sign-in on a browser keeps that browser's memories; signing in on anot
 
 ## Chrome extension (automatic capture)
 
-`extension/` is a Manifest V3 extension that remembers YouTube videos watched for 30+ seconds and Google searches (and clicked results). It talks only to the Corvus server.
+`extension/` is a Manifest V3 extension with a side panel: ask Corvus beside the video or page you have open (it shares that tab's title, link, and video position only while it is selected), and remember it. It captures YouTube videos watched for 30+ seconds, Google searches (and clicked results), and pages on sites you choose to "Always remember". It talks only to the Corvus server.
 
 1. `chrome://extensions` → Developer mode → **Load unpacked** → choose `extension/` (or unzip `/corvus-capture.zip` from the app).
-2. In Corvus → **Import** → **Get pairing code**; enter it in the extension popup (choose "Local development" when testing against localhost:3000).
-3. Pause/resume capture from the popup. Deleting your data in Corvus also disconnects the extension.
+2. In Corvus → **Browser extension** → **Get pairing code**; click the Corvus bird in the toolbar and enter the code in the side panel (choose "Local development" when testing against localhost:3000).
+3. The toolbar bird shows what Corvus does on each tab: glowing while it is capturing (a video playing, a page just saved), violet on a remembered site, grey on a site it doesn't remember, amber eye when paused, red eye when disconnected. Icons are rendered from the brand mark by `bash scripts/ext-icons.sh`.
+4. Pause/resume capture from the side panel's Activity tab. Deleting your data in Corvus also disconnects the extension.
 
 ## Google Cloud setup (once per project)
 
