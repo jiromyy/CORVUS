@@ -4,9 +4,6 @@ A private, source-grounded memory for what you watch, search, and read. Built fo
 
 > Corvus is a hackathon concept and is not a Google product.
 
-- Product spec: [CORVUS_PRODUCT_BUILD_SPEC.md](CORVUS_PRODUCT_BUILD_SPEC.md)
-- Three-day plan and progress: [CORVUS_DEVELOPMENT_PLAN.md](CORVUS_DEVELOPMENT_PLAN.md)
-
 ## Stack
 
 Next.js 16 (App Router, TypeScript, Tailwind) · Gemini on Google Cloud via `@google/genai` · Cloud Firestore (vector search) · Cloud Storage · Cloud Run.
