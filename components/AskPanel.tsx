@@ -1,21 +1,25 @@
 "use client";
 
-import { AlertCircle, ArrowRight, ArrowUp, Bug, Calculator, CheckCircle2, ChevronDown, Download, ExternalLink, Globe2, History, Sparkles, type LucideIcon } from "lucide-react";
+import { AlertCircle, ArrowRight, ArrowUp, CheckCircle2, ChevronDown, ExternalLink, FileText, Globe2, History, Languages, Search, Sparkles, Video, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { AskResult } from "@/lib/agent/run";
+import type { Prompt, PromptKind } from "@/lib/prompts";
 import { Mark } from "./Brand";
 import { ASK_EVENT, NEW_CONVERSATION_EVENT } from "./shell/events";
 import { rememberQuestion } from "./shell/RecentQuestions";
 import { SourceCard } from "./SourceCard";
 import { SpeakButton } from "./SpeakButton";
 
-const SUGGESTIONS: Array<{ icon: LucideIcon; text: string }> = [
-  { icon: Bug, text: "Where did I see how to fix the TypeError when adding a number to input()?" },
-  { icon: Download, text: "Saan ko napanood kung paano mag-install ng Python?" },
-  { icon: Calculator, text: "Which video showed a tip calculator?" },
-  { icon: History, text: "Give me a summary of my week" },
-];
+/** Icons for the starter questions, which come from the visitor's most recent memories (lib/prompts.ts). */
+const PROMPT_ICON: Record<PromptKind, LucideIcon> = {
+  search: Search,
+  video: Video,
+  article: FileText,
+  filipino: Languages,
+  summary: History,
+  explore: Globe2,
+};
 
 const TRACE_LABEL: Record<string, string> = {
   search_memories: "Searched memories for",
@@ -51,6 +55,14 @@ export function AskPanel() {
   const [state, setState] = useState<State>({ status: "idle" });
   const [hello, setHello] = useState("Hello.");
   const [explore, setExplore] = useState(false);
+  const [prompts, setPrompts] = useState<{ prompts: Prompt[]; signedIn: boolean } | undefined>();
+
+  useEffect(() => {
+    fetch("/api/ask/suggestions")
+      .then((r) => (r.ok ? r.json() : { prompts: [], signedIn: false }))
+      .catch(() => ({ prompts: [], signedIn: false }))
+      .then(setPrompts);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- local time is only known in the browser
@@ -63,7 +75,9 @@ export function AskPanel() {
     return () => window.removeEventListener(NEW_CONVERSATION_EVENT, reset);
   }, []);
 
-  async function ask(q: string) {
+  async function ask(q: string, opts: { explore?: boolean } = {}) {
+    const useExplore = opts.explore ?? explore;
+    if (opts.explore !== undefined) setExplore(opts.explore);
     const text = q.trim();
     if (!text || state.status === "loading") return;
     setQuestion("");
@@ -74,7 +88,7 @@ export function AskPanel() {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, explore }),
+        body: JSON.stringify({ question: text, explore: useExplore }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? `Request failed (${res.status})`);
@@ -130,15 +144,30 @@ export function AskPanel() {
           <p>Ask about anything you watched, searched, or read, in English or Filipino, and jump back to the exact moment.</p>
         </div>
         {composer("hero")}
-        <div className="prompt-grid stagger">
-          {SUGGESTIONS.map(({ icon: Icon, text }) => (
-            <button key={text} className="prompt-card" onClick={() => ask(text)}>
-              <Icon size={18} />
-              <span>{text}</span>
-              <ArrowRight size={16} />
-            </button>
-          ))}
-        </div>
+        {prompts === undefined ? (
+          <div className="prompt-grid" aria-hidden>
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="prompt-card prompt-skeleton" />
+            ))}
+          </div>
+        ) : prompts.prompts.length ? (
+          <div className="prompt-grid stagger" aria-label="Suggested questions from your recent memories">
+            {prompts.prompts.map((p) => {
+              const Icon = PROMPT_ICON[p.kind];
+              return (
+                <button key={p.text} className={`prompt-card ${p.explore ? "explore" : ""}`} onClick={() => ask(p.text, p.explore ? { explore: true } : {})}>
+                  <Icon size={18} />
+                  <span>{p.text}</span>
+                  {p.explore ? <span className="badge accent">Explore</span> : <ArrowRight size={16} />}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="w-full max-w-[760px]">
+            <EmptyMemory signedIn={prompts.signedIn} onExplore={() => setExplore(true)} />
+          </div>
+        )}
       </section>
     );
   }

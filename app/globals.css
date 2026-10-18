@@ -735,3 +735,9 @@ button.lyric-line:hover { opacity: .78; color: var(--text-2); }
 .connection-line.warning { color: var(--warning) !important; }
 .connection-line.neutral { color: var(--text-2) !important; }
 @keyframes dot-live { 50% { box-shadow: 0 0 0 7px var(--success-wash); } }
+
+/* Ask: starter questions from recent memories */
+.prompt-skeleton { min-height: 56px; background: linear-gradient(90deg, var(--surface-1), var(--surface-3), var(--surface-1)); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; border-color: var(--border); cursor: default; }
+.prompt-card.explore { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+.prompt-card .badge { font-size: 10.5px; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
