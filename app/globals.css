@@ -711,3 +711,17 @@ button.lyric-line:hover { opacity: .78; color: var(--text-2); }
 .sidebar-section .section-label { padding: 0 8px 6px; }
 .capture-card > a strong { display: block; font-size: 12.5px; }
 .capture-card > a span { display: block; color: var(--text-3); font-size: 11.5px; margin-top: 3px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ---------- explore mode + empty memory ---------- */
+.explore-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px; border: 1px solid var(--border); border-radius: 99px; background: transparent; color: var(--text-3); font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 150ms ease; }
+.explore-toggle:hover { color: var(--text-1); border-color: var(--border-strong); }
+.explore-toggle.on { color: var(--accent-soft); background: var(--accent-wash); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.web-sources { display: grid; gap: 8px; margin-top: 12px; }
+.web-source { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-1); color: var(--text-3); transition: border-color 150ms ease, transform 150ms ease; }
+.web-source:hover { border-color: var(--border-strong); transform: translateY(-1px); color: var(--text-1); }
+.web-source strong { display: block; color: var(--text-1); font-size: 14px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.web-source small { display: block; font-size: 12px; margin-top: 2px; }
+.empty-memory { padding: 18px; border: 1px dashed color-mix(in srgb, var(--accent) 35%, var(--border)); border-radius: 16px; background: var(--accent-wash); }
+.empty-memory h2 { margin: 0 0 6px; font-size: 17px; }
+.empty-memory p { margin: 0 0 14px; color: var(--text-2); font-size: 14px; line-height: 1.6; }
+@media (max-width: 600px) { .composer-hint { display: none; } }

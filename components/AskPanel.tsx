@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, ArrowRight, ArrowUp, Bug, Calculator, CheckCircle2, ChevronDown, Download, History, Sparkles, type LucideIcon } from "lucide-react";
+import { AlertCircle, ArrowRight, ArrowUp, Bug, Calculator, CheckCircle2, ChevronDown, Download, ExternalLink, Globe2, History, Sparkles, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { AskResult } from "@/lib/agent/run";
 import { Mark } from "./Brand";
@@ -20,6 +21,7 @@ const TRACE_LABEL: Record<string, string> = {
   search_memories: "Searched memories for",
   summarize_activity: "Reviewed your activity",
   get_memory: "Opened memory",
+  google_search: "Searched the web for",
 };
 
 const CONFIDENCE = {
@@ -35,6 +37,7 @@ type State =
   | { status: "idle" }
   | { status: "loading"; question: string }
   | { status: "done"; question: string; result: AskResult & { ms: number } }
+  | { status: "empty"; question: string; signedIn: boolean }
   | { status: "error"; question: string; message: string };
 
 function greeting(hour: number) {
@@ -47,6 +50,7 @@ export function AskPanel() {
   const [question, setQuestion] = useState("");
   const [state, setState] = useState<State>({ status: "idle" });
   const [hello, setHello] = useState("Hello.");
+  const [explore, setExplore] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- local time is only known in the browser
@@ -70,11 +74,12 @@ export function AskPanel() {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text }),
+        body: JSON.stringify({ question: text, explore }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? `Request failed (${res.status})`);
-      setState({ status: "done", question: text, result: body });
+      if (body.empty) setState({ status: "empty", question: text, signedIn: body.signedIn });
+      else setState({ status: "done", question: text, result: body });
     } catch (err) {
       setState({ status: "error", question: text, message: err instanceof Error ? err.message : "Something went wrong" });
     }
@@ -104,6 +109,8 @@ export function AskPanel() {
       onChange={setQuestion}
       onSubmit={() => ask(question)}
       busy={state.status === "loading"}
+      explore={explore}
+      onExplore={setExplore}
     />
   );
 
@@ -160,6 +167,7 @@ export function AskPanel() {
             </p>
           )}
           {state.status === "done" && <Answer question={state.question} result={state.result} onAsk={ask} />}
+          {state.status === "empty" && <EmptyMemory signedIn={state.signedIn} onExplore={() => setExplore(true)} />}
         </div>
       </div>
       <div className="mt-10">{composer("follow-up")}</div>
@@ -173,12 +181,16 @@ function Composer({
   onChange,
   onSubmit,
   busy,
+  explore,
+  onExplore,
 }: {
   variant: "hero" | "follow-up";
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   busy: boolean;
+  explore: boolean;
+  onExplore: (v: boolean) => void;
 }) {
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -200,15 +212,33 @@ function Composer({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKey}
-        placeholder={variant === "hero" ? "Where did I see…? Ask in any language" : "Ask a follow-up…"}
+        placeholder={explore ? "e.g. Find more readings related to the article I read" : variant === "hero" ? "Where did I see…? Ask in any language" : "Ask a follow-up…"}
         rows={variant === "hero" ? 2 : 1}
         maxLength={500}
         autoComplete="off"
       />
       <div className="composer-footer">
-        <span className="composer-hint">
-          <Sparkles size={14} /> Searches only your memories · cites every source
-        </span>
+        <div className="flex min-w-0 items-center gap-2">
+          <button
+            type="button"
+            className={`explore-toggle ${explore ? "on" : ""}`}
+            role="switch"
+            aria-checked={explore}
+            onClick={() => onExplore(!explore)}
+            title="Also search public websites with Google Search"
+          >
+            <Globe2 size={14} /> Explore the web
+          </button>
+          <span className="composer-hint">
+            {explore ? (
+              "Your memories + public sources, all cited"
+            ) : (
+              <>
+                <Sparkles size={14} /> Only your memories · cites every source
+              </>
+            )}
+          </span>
+        </div>
         <button className="send-button" aria-label="Ask" type="submit" disabled={busy || !value.trim()}>
           <ArrowUp size={18} />
         </button>
@@ -247,6 +277,7 @@ function Answer({ question, result, onAsk }: { question: string; result: AskResu
       <p className={`confidence-note ${result.confidence}`}>
         {result.confidence === "high" ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />} {CONFIDENCE[result.confidence]}
         {result.mode === "fallback" && " · fallback mode"}
+        {result.mode === "explore" && " · Explore mode: includes public web sources"}
       </p>
 
       {result.sources.length > 0 && (
@@ -255,6 +286,24 @@ function Answer({ question, result, onAsk }: { question: string; result: AskResu
           <div className="source-list stagger">
             {result.sources.map((s, i) => (
               <SourceCard key={s.id} memory={s} index={i} claim={claims.get(s.id)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {result.webSources && result.webSources.length > 0 && (
+        <div className="mt-6">
+          <span className="eyebrow">From the web · found with Google Search</span>
+          <div className="web-sources stagger">
+            {result.webSources.map((w, i) => (
+              <a key={w.url} href={w.url} target="_blank" rel="noreferrer" className="web-source">
+                <span className="cite-num">{i + 1}</span>
+                <span className="min-w-0">
+                  <strong>{w.title}</strong>
+                  <small>{w.domain}</small>
+                </span>
+                <ExternalLink size={14} />
+              </a>
             ))}
           </div>
         </div>
@@ -275,5 +324,38 @@ function Answer({ question, result, onAsk }: { question: string; result: AskResu
         <SpeakButton text={result.answer} language={looksFilipino(question) ? "fil" : "en"} />
       </div>
     </>
+  );
+}
+
+/** No memories to answer from: explain, and offer the ways to get some (or to look beyond memory). */
+function EmptyMemory({ signedIn, onExplore }: { signedIn: boolean; onExplore: () => void }) {
+  async function trySample() {
+    await fetch("/api/workspace", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ includeSample: true }) });
+    window.location.reload();
+  }
+  return (
+    <div className="empty-memory">
+      <h2>Corvus doesn’t have any memories to answer from yet</h2>
+      <p>
+        Import your Google Takeout or pair the browser extension, and Corvus will answer from what you actually watched,
+        searched, and read. Or switch on Explore to search public websites.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Link href="/import" className="button compact">
+          Import history
+        </Link>
+        <Link href="/extension" className="button secondary compact">
+          Pair the extension
+        </Link>
+        <button className="button secondary compact" onClick={onExplore}>
+          <Globe2 size={14} /> Turn on Explore
+        </button>
+        {!signedIn && (
+          <button className="button ghost compact" onClick={trySample}>
+            Try Raven’s sample data
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

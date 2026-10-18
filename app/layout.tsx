@@ -18,7 +18,6 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Corvus",
   description: "A private, source-grounded memory for what you watch, search, and read.",
-  icons: { icon: "/brand/Icon.svg" },
 };
 
 // Applies the saved light/dark/system preference before first paint, so there is no theme flash.

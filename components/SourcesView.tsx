@@ -7,7 +7,7 @@ import { formatSeen } from "./ui";
 
 type Summary = { videos: number; searches: number; pages: number; moments: number; latest: string | null };
 type Sources = {
-  sample: Summary & { included: boolean; hidden: number };
+  sample: Summary & { included: boolean; signedIn: boolean; hidden: number };
   takeout: Summary;
   extension: Summary & { pairedBrowsers: number };
 };
@@ -52,13 +52,13 @@ export function SourcesView() {
           <SourceTile
             icon={Sparkles}
             title="Raven’s sample history"
-            status={data.sample.included ? "Included" : "Hidden"}
+            status={data.sample.signedIn ? "Guests only" : data.sample.included ? "Included" : "Off"}
             tone={data.sample.included ? "success" : "neutral"}
             summary={data.sample}
-            description="Two weeks of a student learning Python, built from real public YouTube videos, so you can try Corvus right away."
+            description="Two weeks of a student learning Python, built from real public YouTube videos. Guests can opt in to try Corvus; it’s never mixed in once you sign in."
             actions={
               <Link href="/settings" className="button secondary compact">
-                {data.sample.included ? "Hide or restore" : "Include it"}
+                {data.sample.signedIn ? "About sample data" : data.sample.included ? "Turn off" : "Try it"}
               </Link>
             }
             note={data.sample.hidden ? `${data.sample.hidden} sample memories forgotten by you` : undefined}

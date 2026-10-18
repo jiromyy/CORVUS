@@ -7,7 +7,7 @@ import { CaptureControls } from "./CaptureControls";
 import { useEvidence } from "./Evidence";
 import { THEME_EVENT, currentTheme, setTheme, type ThemePreference } from "./shell/theme";
 
-type Workspace = { includeSample: boolean; hiddenSampleCount: number; own: { videos: number; searches: number; pages: number; total: number } };
+type Workspace = { includeSample: boolean; signedIn?: boolean; hiddenSampleCount: number; own: { videos: number; searches: number; pages: number; total: number } };
 type Session = { configured: boolean; user: { name?: string; email?: string } | null };
 
 const THEMES: Array<{ value: ThemePreference; label: string; icon: typeof Sun }> = [
@@ -145,10 +145,18 @@ export function SettingsView() {
         <p>
           {ws ? `${ws.own.total} memories are yours (${ws.own.videos} videos, ${ws.own.searches} searches, ${ws.own.pages} pages).` : "Loading…"}
         </p>
-        <div className="setting-row">
+        {ws?.signedIn ? (
+          <div className="setting-row">
+            <div>
+              <h3>Raven’s sample data</h3>
+              <p>Only for trying Corvus while signed out. Signed in, Corvus uses only your own memories.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="setting-row">
           <div>
             <h3>Include Raven’s sample history</h3>
-            <p>Show the sample alongside your own memories in answers, suggestions, and insights.</p>
+            <p>Try Corvus with a sample history while signed out. It’s never mixed in once you sign in.</p>
           </div>
           <button
             className="switch"
@@ -161,6 +169,7 @@ export function SettingsView() {
             <span />
           </button>
         </div>
+        )}
         {ws && ws.hiddenSampleCount > 0 && (
           <div className="setting-row">
             <div>

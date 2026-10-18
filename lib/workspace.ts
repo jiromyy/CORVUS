@@ -68,15 +68,21 @@ export async function clearWorkspace() {
   (await cookies()).delete(COOKIE_NAME);
 }
 
-/** The visitor's workspace plus the memory scope for queries: their own, and the sample unless hidden. */
+/**
+ * The visitor's workspace plus the memory scope for queries: their own memories, plus Raven's sample
+ * only for guests (not signed in) who opted into it to try Corvus.
+ */
 export async function getScope() {
   const ws = await getWorkspace();
   const state = await getWorkspaceState(ws.id);
+  const signedIn = Boolean(state.ownerUid);
+  const includeSample = !signedIn && state.includeSample;
   return {
     ws,
+    signedIn,
     hidden: state.hidden,
-    includeSample: state.includeSample,
+    includeSample,
     focusOverride: state.focusOverride,
-    workspaceIds: state.includeSample ? [ws.demoId, ws.id] : [ws.id],
+    workspaceIds: includeSample ? [ws.demoId, ws.id] : [ws.id],
   };
 }

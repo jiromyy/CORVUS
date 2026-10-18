@@ -24,7 +24,8 @@ export function LibraryView() {
   const { openEvidence, notify } = useEvidence();
   const [memories, setMemories] = useState<MemoryView[] | undefined>();
   const [hiddenCount, setHiddenCount] = useState(0);
-  const [includeSample, setIncludeSample] = useState(true);
+  const [includeSample, setIncludeSample] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   const [showMoments, setShowMoments] = useState(false);
   const [query, setQuery] = useState("");
@@ -56,6 +57,7 @@ export function LibraryView() {
         setMemories(body.memories);
         setHiddenCount(body.hiddenCount);
         setIncludeSample(body.includeSample);
+        setSignedIn(Boolean(body.signedIn));
       });
     // Forgetting from the evidence drawer removes the row here too.
     const onForgot = (e: Event) => {
@@ -147,10 +149,12 @@ export function LibraryView() {
       </div>
 
       <div className="memory-options">
-        <label className="check-row">
-          <input type="checkbox" checked={includeSample} disabled={busy === "sample"} onChange={(e) => toggleSample(e.target.checked)} />
-          Include Raven’s sample data
-        </label>
+        {!signedIn && (
+          <label className="check-row">
+            <input type="checkbox" checked={includeSample} disabled={busy === "sample"} onChange={(e) => toggleSample(e.target.checked)} />
+            Include Raven’s sample data
+          </label>
+        )}
         <label className="check-row">
           <input type="checkbox" checked={showMoments} onChange={(e) => setShowMoments(e.target.checked)} />
           Show individual video moments

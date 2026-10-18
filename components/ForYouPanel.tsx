@@ -43,7 +43,7 @@ function writeStorage(key: string, value: unknown) {
   }
 }
 
-type Data = { mode: Mode; focus?: Focus; suggestions: Suggestion[]; feedback?: FeedbackMap };
+type Data = { mode: Mode; focus?: Focus; dismissedFocus?: string; suggestions: Suggestion[]; feedback?: FeedbackMap; activityCount?: number };
 
 export function ForYouPanel() {
   const [mode, setMode] = useState<Mode | undefined>();
@@ -51,9 +51,7 @@ export function ForYouPanel() {
   const [data, setData] = useState<Data | undefined>();
   const [refreshing, setRefreshing] = useState(false);
   const [dismissed, setDismissed] = useState<string[]>([]);
-  const [editing, setEditing] = useState(false);
   const [openWhy, setOpenWhy] = useState<string | null>(null);
-  const [focusDraft, setFocusDraft] = useState("");
 
   useEffect(() => {
     const saved = readStorage<Mode | null>(STORAGE_MODE, null);
@@ -109,16 +107,7 @@ export function ForYouPanel() {
   }
   const verdictOf = (key: string) => data?.feedback?.[key.replace(/[.~*/[\]]/g, "_")]?.verdict;
 
-  async function saveFocus(label: string | null) {
-    await fetch("/api/foryou/focus", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label }),
-    });
-    setEditing(false);
-    setRefreshing(true);
-    setReloadKey((k) => k + 1);
-  }
+
 
   const visible = (data?.suggestions ?? []).filter((s) => !dismissed.includes(s.id));
 
@@ -149,29 +138,24 @@ export function ForYouPanel() {
           <Compass size={19} />
         </span>
         <div className="min-w-0">
-          {data?.focus && !editing && (
+          {data?.focus && (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-              <span className="muted">{data.focus.source === "user" ? "Your focus:" : "It looks like you’re focused on"}</span>
+              <span className="muted">It looks like you’re focused on</span>
               <strong>{data.focus.label}</strong>
-              <span className={`badge ${data.focus.source === "user" || verdictOf(`focus:${data.focus.label}`) === "right" ? "success" : "accent"}`}>
-                {data.focus.source === "user"
-                  ? "Set by you"
-                  : verdictOf(`focus:${data.focus.label}`) === "right"
-                    ? "Confirmed by you"
-                    : `Inferred · ${data.focus.confidence} confidence`}
-              </span>
-              {data.focus.source !== "user" && verdictOf(`focus:${data.focus.label}`) !== "right" && (
-                <button onClick={() => sendFeedback(`focus:${data.focus!.label}`, "right", { title: data.focus!.label })} className="feedback-chip">
-                  <ThumbsUp size={12} /> That’s right
+              {verdictOf(`focus:${data.focus.label}`) === "right" ? (
+                <button className="feedback-chip on" onClick={() => sendFeedback(`focus:${data.focus!.label}`, null)} title="Undo">
+                  <Check size={12} /> Confirmed by you · undo
                 </button>
-              )}
-              <button onClick={() => { setFocusDraft(data.focus!.label); setEditing(true); }} className="text-link text-[13px]">
-                {data.focus.source === "user" ? "Change" : "Not right? Edit"}
-              </button>
-              {data.focus.source === "user" && (
-                <button onClick={() => saveFocus(null)} className="faint text-[13px] hover:underline">
-                  Let Corvus infer it
-                </button>
+              ) : (
+                <>
+                  <span className="badge accent">Inferred · {data.focus.confidence} confidence</span>
+                  <button onClick={() => sendFeedback(`focus:${data.focus!.label}`, "right", { title: data.focus!.label })} className="feedback-chip">
+                    <ThumbsUp size={12} /> That’s right
+                  </button>
+                  <button onClick={() => sendFeedback(`focus:${data.focus!.label}`, "wrong", { title: data.focus!.label })} className="feedback-chip">
+                    <ThumbsDown size={12} /> Not right
+                  </button>
+                </>
               )}
               {data.focus.evidence.length > 0 && (
                 <details className="w-full text-[13px] faint">
@@ -185,31 +169,32 @@ export function ForYouPanel() {
               )}
             </div>
           )}
-          {editing && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                saveFocus(focusDraft.trim() || null);
-              }}
-              className="flex flex-wrap gap-2"
-            >
-              <label htmlFor="focus-edit" className="sr-only">
-                What are you focused on?
-              </label>
-              <span className="search-field flex-1">
-                <input id="focus-edit" value={focusDraft} onChange={(e) => setFocusDraft(e.target.value)} maxLength={80} placeholder="What are you focused on?" />
-              </span>
-              <button className="button">Save</button>
-              <button type="button" onClick={() => setEditing(false)} className="button ghost">
-                Cancel
+          {!data?.focus && data?.dismissedFocus && (
+            <p className="m-0 flex flex-wrap items-center gap-2">
+              <span className="muted">You said “{data.dismissedFocus}” isn’t right, so Corvus isn’t assuming a focus.</span>
+              <button className="feedback-chip" onClick={() => sendFeedback(`focus:${data.dismissedFocus}`, null)}>
+                Undo
               </button>
-            </form>
+            </p>
           )}
-          {!data?.focus && !editing && !loading && <p className="muted m-0">Not enough recent activity to tell what you’re focused on yet.</p>}
+          {!data?.focus && !data?.dismissedFocus && !loading && <p className="muted m-0">Not enough recent activity to tell what you’re focused on yet.</p>}
           {!data && loading && <p className="loading-line m-0">Looking at your recent activity…</p>}
         </div>
       </div>
 
+      {data && !loading && (data.activityCount ?? 0) < 3 && (
+        <div className="empty-memory mt-4">
+          <h2>Not enough activity yet for personal suggestions</h2>
+          <p>
+            Corvus suggests from what you watch, search, and read. You have {data.activityCount ?? 0} activit{data.activityCount === 1 ? "y" : "ies"} so far.
+            Import your history or pair the extension, and suggestions will become yours.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/import" className="button compact">Import history</Link>
+            <Link href="/extension" className="button secondary compact">Pair the extension</Link>
+          </div>
+        </div>
+      )}
       <ul className={`suggestion-grid stagger ${loading && data ? "opacity-60" : ""}`} aria-busy={loading}>
         {visible.map((s) => (
           <li key={s.id} className="suggestion-card">

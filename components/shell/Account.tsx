@@ -6,7 +6,7 @@ import { useEvidence } from "../Evidence";
 
 type FirebaseConfig = { apiKey: string; authDomain: string; projectId: string; appId: string };
 type User = { uid: string; name?: string; email?: string; photoURL?: string };
-type Session = { configured: boolean; config: FirebaseConfig | null; user: User | null };
+type Session = { configured: boolean; config: FirebaseConfig | null; user: User | null; includeSample?: boolean };
 
 /**
  * Sidebar account card. Signed out, Corvus uses an anonymous workspace for this browser; signing in with
@@ -92,7 +92,7 @@ export function Account() {
   }
 
   const user = session?.user;
-  const name = user?.name ?? user?.email ?? "Raven’s sample + yours";
+  const name = user?.name ?? user?.email ?? "Guest";
   return (
     <div className="profile-card">
       {user?.photoURL ? (
@@ -100,12 +100,12 @@ export function Account() {
         <img className="avatar object-cover" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
       ) : (
         <div className="avatar" aria-hidden>
-          {(user ? name : "R").slice(0, 1).toUpperCase()}
+          {name.slice(0, 1).toUpperCase()}
         </div>
       )}
       <div className="min-w-0">
         <strong className="truncate">{name}</strong>
-        <span>{user ? "Synced to your Google sign-in" : "Private to this browser"}</span>
+        <span>{user ? "Synced to your Google sign-in" : session?.includeSample ? "Trying Raven’s sample data" : "Private to this browser"}</span>
       </div>
       {session?.configured &&
         (user ? (

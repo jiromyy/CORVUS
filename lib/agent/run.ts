@@ -33,7 +33,9 @@ export type AskResult = {
   sources: SourceCard[];
   suggestedFollowUps: string[];
   trace: TraceStep[];
-  mode: "agent" | "fallback";
+  mode: "agent" | "fallback" | "explore";
+  /** Explore mode only: public web pages Gemini found with Google Search. */
+  webSources?: Array<{ title: string; url: string; domain: string }>;
   rejectedCitations: number;
 };
 
@@ -119,7 +121,7 @@ const brief = (m: MemoryView) => ({
   language: m.language,
 });
 
-const card = (m: MemoryView): SourceCard => ({
+export const card = (m: MemoryView): SourceCard => ({
   id: m.id,
   memoryType: m.memoryType,
   source: m.source,

@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { currentUser, firebaseWebConfig, sameOrigin, signIn } from "@/lib/auth";
-import { clearWorkspace } from "@/lib/workspace";
+import { clearWorkspace, getScope } from "@/lib/workspace";
 
 /** Whether sign-in is available (with the public Firebase config) and who is signed in. */
 export async function GET() {
   const config = firebaseWebConfig();
-  const user = config ? await currentUser() : undefined;
-  return Response.json({ configured: Boolean(config), config: config ?? null, user: user ?? null });
+  const [user, { includeSample }] = await Promise.all([config ? currentUser() : undefined, getScope()]);
+  return Response.json({ configured: Boolean(config), config: config ?? null, user: user ?? null, includeSample });
 }
 
 const Body = z.object({ idToken: z.string().min(20).max(5000) });

@@ -12,10 +12,10 @@ const summarise = (items: MemoryView[]) => ({
 
 /** What feeds this visitor's memory: the sample, Takeout imports, and extension capture. */
 export async function GET() {
-  const { ws, includeSample, hidden } = await getScope();
+  const { ws, includeSample, hidden, signedIn } = await getScope();
   const [sample, own, browsers] = await Promise.all([listMemories([ws.demoId]), listMemories([ws.id]), pairedBrowsers(ws.id)]);
   return Response.json({
-    sample: { ...summarise(sample.filter((m) => !hidden.has(m.id))), included: includeSample, hidden: hidden.size },
+    sample: { ...summarise(sample.filter((m) => !hidden.has(m.id))), included: includeSample, signedIn, hidden: hidden.size },
     takeout: summarise(own.filter((m) => m.sourceMode === "user_import")),
     extension: { ...summarise(own.filter((m) => m.sourceMode === "user_capture")), pairedBrowsers: browsers },
   });

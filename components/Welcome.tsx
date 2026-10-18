@@ -21,6 +21,13 @@ export function Welcome() {
     setShow(!seen);
   }, []);
 
+  /** Opts this (signed-out) browser into Raven's sample, then reloads so every page includes it. */
+  async function trySample() {
+    await fetch("/api/workspace", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ includeSample: true }) }).catch(() => undefined);
+    dismiss();
+    window.location.reload();
+  }
+
   function dismiss() {
     setShow(false);
     try {
@@ -61,7 +68,7 @@ export function Welcome() {
 
       <div className="welcome-grid">
         <div>
-          <h3>You’re looking at Raven’s sample memory</h3>
+          <h3>Try it with Raven’s sample data</h3>
           <p>Two weeks of a student learning Python: 4 real YouTube tutorials (one in Filipino), 8 Google searches, and 2 articles. Try:</p>
           <ul>
             <li>Ask “Where did I see how to fix the TypeError…?” and open the exact second</li>
@@ -98,8 +105,8 @@ export function Welcome() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <button onClick={dismiss} className="button">
-          Explore Raven’s memory
+        <button onClick={trySample} className="button">
+          Try Raven’s sample data
         </button>
         <Link href="/import" onClick={dismiss} className="button secondary">
           Use my own activity <ArrowRight size={15} />

@@ -123,15 +123,17 @@ export async function deactivateMemory(id: string) {
 
 type WorkspaceDoc = { createdAt: string; hiddenMemoryIds?: string[]; includeSample?: boolean; focusOverride?: string | null; ownerUid?: string };
 
-export type WorkspaceState = { hidden: Set<string>; includeSample: boolean; focusOverride?: string };
+export type WorkspaceState = { hidden: Set<string>; includeSample: boolean; focusOverride?: string; ownerUid?: string };
 
-/** Hidden demo memories and whether Raven's sample data is shown alongside the visitor's own. */
+/** Hidden demo memories, whether a guest opted into Raven's sample, and the signed-in owner. */
 export async function getWorkspaceState(workspaceId: string): Promise<WorkspaceState> {
   const doc = (await getDb().collection(WORKSPACES).doc(workspaceId).get()).data() as WorkspaceDoc | undefined;
   return {
     hidden: new Set(doc?.hiddenMemoryIds ?? []),
-    includeSample: doc?.includeSample ?? true,
+    // Raven's sample is opt-in (guests choose it to try Corvus); see getScope for the signed-in rule.
+    includeSample: doc?.includeSample ?? false,
     focusOverride: doc?.focusOverride ?? undefined,
+    ownerUid: doc?.ownerUid,
   };
 }
 
