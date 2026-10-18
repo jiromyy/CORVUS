@@ -1,5 +1,6 @@
 "use client";
 
+import { History } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ASK_EVENT, RECENT_EVENT } from "./events";
@@ -34,11 +35,27 @@ function ago(at: number) {
   return `${Math.round(m / 1440)}d`;
 }
 
-/** Sidebar list of recent questions; selecting one asks it again. */
-export function RecentQuestions({ onNavigate }: { onNavigate: () => void }) {
+/**
+ * Sidebar list of recent questions; selecting one asks it again. The list scrolls within the space it
+ * has; `compact` (a short window) turns it into a button that opens the list as a pop-up.
+ */
+export function RecentQuestions({ onNavigate, compact = false }: { onNavigate: () => void; compact?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [recent, setRecent] = useState<Recent[]>([]);
+  const [popup, setPopup] = useState(false);
+
+  useEffect(() => {
+    if (!popup) return;
+    const close = (e: MouseEvent) => !(e.target as Element).closest(".recent-popup, .recent-button") && setPopup(false);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setPopup(false);
+    window.addEventListener("mousedown", close);
+    window.addEventListener("keydown", esc);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("keydown", esc);
+    };
+  }, [popup]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only list, read after mount
@@ -49,24 +66,44 @@ export function RecentQuestions({ onNavigate }: { onNavigate: () => void }) {
   }, []);
 
   if (!recent.length) return null;
+
+  const items = recent.map((r) => (
+    <button
+      key={r.q}
+      className="recent-chat"
+      title={r.q}
+      onClick={() => {
+        setPopup(false);
+        onNavigate();
+        if (pathname === "/") window.dispatchEvent(new CustomEvent(ASK_EVENT, { detail: r.q }));
+        else router.push(`/?ask=${encodeURIComponent(r.q)}`);
+      }}
+    >
+      <span>{r.q}</span>
+      <span>{ago(r.at)}</span>
+    </button>
+  ));
+
+  if (compact)
+    return (
+      <div className="recent-compact">
+        <button className="nav-item recent-button" aria-haspopup="dialog" aria-expanded={popup} onClick={() => setPopup((v) => !v)}>
+          <History size={17} />
+          <span>Recent questions</span>
+          <span className="badge ml-auto">{recent.length}</span>
+        </button>
+        {popup && (
+          <div className="recent-popup" role="dialog" aria-label="Recent questions">
+            {items}
+          </div>
+        )}
+      </div>
+    );
+
   return (
     <div className="sidebar-section">
       <div className="section-label">Recent questions</div>
-      {recent.slice(0, 4).map((r) => (
-        <button
-          key={r.q}
-          className="recent-chat"
-          title={r.q}
-          onClick={() => {
-            onNavigate();
-            if (pathname === "/") window.dispatchEvent(new CustomEvent(ASK_EVENT, { detail: r.q }));
-            else router.push(`/?ask=${encodeURIComponent(r.q)}`);
-          }}
-        >
-          <span>{r.q}</span>
-          <span>{ago(r.at)}</span>
-        </button>
-      ))}
+      <div className="recent-list">{items}</div>
     </div>
   );
 }

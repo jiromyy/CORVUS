@@ -83,7 +83,6 @@ export function AskPanel() {
     setQuestion("");
     setState({ status: "loading", question: text });
     rememberQuestion(text);
-    window.scrollTo({ top: 0, behavior: "smooth" });
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
@@ -98,6 +97,13 @@ export function AskPanel() {
       setState({ status: "error", question: text, message: err instanceof Error ? err.message : "Something went wrong" });
     }
   }
+
+  // Follow the conversation: keep the newest question, the thinking state, and the reply in view above the docked chat box.
+  useEffect(() => {
+    if (state.status === "idle") return;
+    const id = requestAnimationFrame(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" }));
+    return () => cancelAnimationFrame(id);
+  }, [state]);
 
   // A question passed in the link (e.g. "Ask about this" on Insights) is asked straight away.
   useEffect(() => {
@@ -199,7 +205,7 @@ export function AskPanel() {
           {state.status === "empty" && <EmptyMemory signedIn={state.signedIn} onExplore={() => setExplore(true)} />}
         </div>
       </div>
-      <div className="mt-10">{composer("follow-up")}</div>
+      <div className="chat-dock">{composer("follow-up")}</div>
     </section>
   );
 }
