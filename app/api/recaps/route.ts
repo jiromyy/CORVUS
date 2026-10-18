@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { dayRange, namedRanges } from "@/lib/dates";
 import { createRecap } from "@/lib/recap";
+import { rateLimit } from "@/lib/ratelimit";
 import { getScope } from "@/lib/workspace";
 
 const Body = z.object({
@@ -17,6 +18,8 @@ export async function POST(request: Request) {
   const days = { this_week: r.thisWeek, last_week: r.lastWeek, last_7_days: r.last7Days }[parsed.data.period];
   const range = dayRange(days.from, days.to);
   const { ws, workspaceIds, hidden, focusOverride } = await getScope();
+  const limited = await rateLimit(request, "recap", ws.id);
+  if (limited) return limited;
   try {
     const recap = await createRecap({
       ownerWorkspaceId: ws.id,

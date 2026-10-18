@@ -3,7 +3,7 @@
 > Three-day execution plan, setup checklist, and progress tracker
 > Version: **v2 (2026-10-16)**. Previous version: `archive/GOOGLE_CORVUS_DEVELOPMENT_PLAN.v1.md`
 > Product spec: `CORVUS_PRODUCT_BUILD_SPEC.md` (v2)
-> Deadline: **October 19, 2026** — time and time zone to confirm
+> Deadline: **19 Oct 2026, 02:29 IST** = 18 Oct 20:59 UTC = **19 Oct 04:59 Philippine time**. Submit by 19 Oct 01:00 PHT (4 h buffer).
 
 ---
 
@@ -27,7 +27,15 @@
 | Day 2 | Sun Oct 18 | Tier 1, then Tier 2; seed content final | **App freeze 20:00 local**; final deploy |
 | Day 3 | Mon Oct 19 | Eval numbers, bug fixes only, video, deck PDF, submit | Submit with ≥ 3 h buffer before deadline |
 
-Adjust if the deadline time turns out to be early on Oct 19.
+**Final schedule (Philippine time), set 2026-10-18 02:00 PHT once the deadline was confirmed:**
+
+| When (PHT) | What |
+|---|---|
+| Sat 18 Oct, morning–afternoon | Video script + deck content drafted; bug fixes only; Filipino article reviewed |
+| Sat 18 Oct 18:00 | **App freeze**: final deploy, run `npm run eval` ×3, record revision |
+| Sat 18 Oct 19:00–22:00 | Record and edit the 3-min video from the frozen revision; upload; check it plays logged out |
+| Sat 18 Oct 22:00–24:00 | Screenshots into deck; export PDF; link audit (app, video, repo) |
+| **Sun 19 Oct 01:00** | **Submit** (deadline 04:59 PHT = 02:29 IST) |
 
 ---
 
@@ -202,7 +210,7 @@ GitHub repo:                TBD
 | R3 | Agent loop latency during demo | Use gemini-3.5-flash (~5 s); add a per-call timeout (abort + one retry) and keep the 6-step cap; warm instance | Mitigated |
 | R4 | Firestore vector index setup | Index READY, spike passed | Closed |
 | R5 | Google Cloud CLI not installed on the main dev machine (git, Node 22, npm, Docker are present) | Install gcloud before Cloud setup and deploy | Open |
-| R6 | Deadline hour unknown | Confirm today | Open |
+| R6 | Deadline hour unknown | Confirmed: 19 Oct 02:29 IST = 04:59 PHT; submit by 01:00 PHT | Closed |
 | R7 | Seed videos that block embedding cannot open inside the app at a timestamp | Check oEmbed (200 = embeddable) for every seed video; fall back to opening youtube.com at ?t= | Open |
 | R8 | Long videos give coarse and partly inaccurate moments | Seed videos ≤ ~20 min (verified accurate); long videos later in ~10-min windows | Mitigated |
 

@@ -169,10 +169,27 @@ export async function getRecap(id: string): Promise<StoredRecap | undefined> {
 }
 
 /** Most recent recap the visitor may see (their own first, then the shared sample). */
-export async function latestRecap(workspaceIds: string[]): Promise<StoredRecap | undefined> {
+async function listRecaps(workspaceIds: string[]): Promise<StoredRecap[]> {
   const snap = await getDb().collection(RECAPS).where("workspaceId", "in", workspaceIds).get();
-  const all = snap.docs.map((d) => d.data() as StoredRecap).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  return all.find((r) => r.workspaceId !== workspaceIds[0]) ?? all[0];
+  return snap.docs.map((d) => d.data() as StoredRecap).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/**
+ * Most recent recap the visitor may see: their own before the shared sample's, and in the preferred
+ * language when one exists (so a Filipino recap doesn't replace the English one for everyone).
+ */
+export async function latestRecap(workspaceIds: string[], language = "en"): Promise<StoredRecap | undefined> {
+  const all = await listRecaps(workspaceIds);
+  const sample = workspaceIds.length > 1 ? workspaceIds[0] : undefined;
+  const own = all.filter((r) => r.workspaceId !== sample);
+  const pool = own.length ? own : all;
+  return pool.find((r) => r.language === language) ?? pool[0];
+}
+
+/** The newest recap from the same owner in the other language, if any. */
+export async function alternateRecap(workspaceIds: string[], recap: StoredRecap) {
+  const other = (await listRecaps(workspaceIds)).find((r) => r.workspaceId === recap.workspaceId && r.language !== recap.language);
+  return other ? { id: other.id, language: other.language } : null;
 }
 
 export async function readRecapAudio(recap: StoredRecap) {

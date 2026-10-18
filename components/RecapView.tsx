@@ -13,6 +13,7 @@ type Period = "last_7_days" | "this_week" | "last_week";
 export function RecapView() {
   const id = useSearchParams().get("id");
   const [recap, setRecap] = useState<StoredRecap | null | undefined>();
+  const [alternate, setAlternate] = useState<{ id: string; language: string } | null>(null);
   const [current, setCurrent] = useState(0);
   const [making, setMaking] = useState<{ startedAt: number } | undefined>();
   const [error, setError] = useState<string>();
@@ -23,8 +24,12 @@ export function RecapView() {
   useEffect(() => {
     let cancelled = false;
     fetch(id ? `/api/recaps/${encodeURIComponent(id)}` : "/api/recaps/latest")
-      .then((r) => (r.ok ? r.json() : { recap: null }))
-      .then((body) => !cancelled && setRecap(body.recap));
+      .then((r) => (r.ok ? r.json() : { recap: null, alternate: null }))
+      .then((body) => {
+        if (cancelled) return;
+        setRecap(body.recap);
+        setAlternate(body.alternate ?? null);
+      });
     return () => {
       cancelled = true;
     };
@@ -42,6 +47,7 @@ export function RecapView() {
     setMaking(undefined);
     if (!res?.ok) return setError(body?.error ?? "Couldn’t make the recap. Try again.");
     setRecap(body.recap);
+    setAlternate(null);
     setCurrent(0);
     window.history.replaceState(null, "", `/recap?id=${body.recap.id}`);
   }
@@ -73,6 +79,11 @@ export function RecapView() {
           <h1 id="recap-title" className="mt-1 text-2xl font-semibold">
             {recap.title}
           </h1>
+          {alternate && (
+            <Link href={`/recap?id=${alternate.id}`} className="mt-2 inline-block text-sm text-[var(--accent)] hover:underline">
+              {alternate.language === "fil" ? "Pakinggan sa Filipino →" : "Listen in English →"}
+            </Link>
+          )}
           <audio ref={audio} src={recap.audioUrl} controls preload="metadata" onTimeUpdate={onTime} className="mt-4 w-full" />
           <ol className="mt-5 space-y-3">
             {recap.chapters.map((c, i) => (

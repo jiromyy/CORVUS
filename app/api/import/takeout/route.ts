@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ingestRecords } from "@/lib/ingest/records";
+import { rateLimit } from "@/lib/ratelimit";
 import { sanitizeRecord, type TakeoutRecord } from "@/lib/takeout";
 import { getWorkspace } from "@/lib/workspace";
 
@@ -20,6 +21,8 @@ export async function POST(request: Request) {
   if (!records.length) return Response.json({ memories: 0, videos: [], searches: 0, pages: 0, skipped });
 
   const ws = await getWorkspace();
+  const limited = await rateLimit(request, "import", ws.id);
+  if (limited) return limited;
   const result = await ingestRecords(ws.id, "user_import", records);
   return Response.json({ ...result, skipped });
 }
